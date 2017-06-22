@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 
 import edu.rit.dao.iapi.Database;
+import edu.rit.dao.iapi.relational.UnaryOperation;
 import edu.rit.dao.impl.DerbyDBImpl;
 import edu.rit.utils.ExecutionPlanParser;
 
@@ -128,13 +129,13 @@ public class TestDerbyDBImpl {
 		schema.put("teaches", teachesTable);
 		
 		String query = "select p.name, d.name from professor p, department d where p.idDept=d.id and d.budget>9500";
-		ResultSetStatistics plan = executeQuery(schema, query);
+		UnaryOperation plan = executeQuery(schema, query);
 		
 		
 	}
 	//MJCG GenericResultDescription
-	public static ResultSetStatistics executeQuery(Map<String, Map<String, String>> schema, String query) {
-		ResultSetStatistics plan = null;
+	public static UnaryOperation executeQuery(Map<String, Map<String, String>> schema, String query) {
+		UnaryOperation plan = null;
 		Database db = new DerbyDBImpl();
 		db.createDB();
 		schema.entrySet().forEach(t -> db.createTable(t.getKey(), t.getValue()));
@@ -148,7 +149,7 @@ public class TestDerbyDBImpl {
 		plan = db.getExecutionPlan(query);
 		db.shutdown();
 		db.dropDB();
-		ExecutionPlanParser.parser(plan);
+		//ExecutionPlanParser.parser(plan);
 		return plan;
 	}
 

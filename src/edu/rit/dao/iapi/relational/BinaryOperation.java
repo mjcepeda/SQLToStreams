@@ -3,13 +3,13 @@ package edu.rit.dao.iapi.relational;
 /**
  * The Class BinaryOperation.
  */
-public class BinaryOperation extends RelationAlgebraOperation {
+public abstract class BinaryOperation{
 
 	/** The left source. */
-	private RelationAlgebraOperation leftSource;
+	private String leftSource;
 
 	/** The right source. */
-	private RelationAlgebraOperation rightSource;
+	private String rightSource;
 
 	/**
 	 * Instantiates a new binary operation.
@@ -19,37 +19,42 @@ public class BinaryOperation extends RelationAlgebraOperation {
 	 * @param rightSource
 	 *            the right source
 	 */
-	public BinaryOperation(RelationAlgebraOperation leftSource, RelationAlgebraOperation rightSource) {
-		super(null);
+	public BinaryOperation(String leftSource, String rightSource) {
 		this.leftSource = leftSource;
 		this.rightSource = rightSource;
 	}
 
 	/**
+	 * Perform.
+	 *
+	 * @return the string
+	 */
+	public abstract String perform();
+	/**
 	 * @return the leftSource
 	 */
-	public RelationAlgebraOperation getLeftSource() {
+	public String getLeftSource() {
 		return leftSource;
 	}
 
 	/**
 	 * @param leftSource the leftSource to set
 	 */
-	public void setLeftSource(RelationAlgebraOperation leftSource) {
+	public void setLeftSource(String leftSource) {
 		this.leftSource = leftSource;
 	}
 
 	/**
 	 * @return the rightSource
 	 */
-	public RelationAlgebraOperation getRightSource() {
+	public String getRightSource() {
 		return rightSource;
 	}
 
 	/**
 	 * @param rightSource the rightSource to set
 	 */
-	public void setRightSource(RelationAlgebraOperation rightSource) {
+	public void setRightSource(String rightSource) {
 		this.rightSource = rightSource;
 	}
 }

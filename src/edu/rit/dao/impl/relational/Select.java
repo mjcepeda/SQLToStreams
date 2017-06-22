@@ -1,44 +1,53 @@
 package edu.rit.dao.impl.relational;
 
 import java.util.List;
-import edu.rit.dao.iapi.relational.RelationAlgebraOperation;
-import edu.rit.dao.impl.store.access.Qualifier;
+
+import edu.rit.dao.iapi.relational.UnaryOperation;
 
 /**
  * The Class Select.
  */
-public class Select extends RelationAlgebraOperation{
+public class Select extends UnaryOperation{
 
-	
-	/** The qualifiers. */
-	private List<Qualifier> qualifiers;
+	/** The att names. */
+	private List<String> attNames;
 	
 	/**
 	 * Instantiates a new select.
 	 *
-	 * @param table the table
-	 * @param qualifiers the qualifiers
+	 * @param name the name
+	 * @param attNames the att names
 	 */
-	public Select(String table, List<Qualifier> qualifiers) {
-		super(table);
-		this.qualifiers=qualifiers;
+	public Select(String name, List<String> attNames) {
+		super(name);
+		this.attNames=attNames;
+	}
+	
+	/* (non-Javadoc)
+	 * @see edu.rit.dao.iapi.relational.UnaryOperation#perform()
+	 */
+	public String perform() {
+		StringBuilder streamCode = new StringBuilder();
+		streamCode.append(beanName+".stream().filter(bean -> {");
+		//TODO
+		return streamCode.toString();
 	}
 	
 	/**
-	 * Gets the qualifiers.
+	 * Gets the att names.
 	 *
-	 * @return the qualifiers
+	 * @return the attNames
 	 */
-	public List<Qualifier> getQualifiers() {
-		return qualifiers;
+	public List<String> getAttNames() {
+		return attNames;
 	}
-	
+
 	/**
-	 * Sets the qualifiers.
+	 * Sets the att names.
 	 *
-	 * @param qualifiers the new qualifiers
+	 * @param attNames the attNames to set
 	 */
-	public void setQualifiers(List<Qualifier> qualifiers) {
-		this.qualifiers = qualifiers;
+	public void setAttNames(List<String> attNames) {
+		this.attNames = attNames;
 	}
 }

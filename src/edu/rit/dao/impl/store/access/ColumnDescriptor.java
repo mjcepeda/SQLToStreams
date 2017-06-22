@@ -11,6 +11,7 @@ public class ColumnDescriptor {
 	/** The name. */
 	private String name;
 	
+	//TODO MJCG Field necessary? Redundancy 
 	/** The table name. */
 	private String tableName;
 	

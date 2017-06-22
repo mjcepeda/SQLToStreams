@@ -7,16 +7,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
 import org.apache.derby.impl.jdbc.EmbedResultSet42;
 
 import edu.rit.dao.iapi.Database;
+import edu.rit.dao.iapi.relational.UnaryOperation;
+import edu.rit.dao.impl.store.access.TableDescriptor;
 
 /**
  * The Class DerbyDBImpl.
@@ -83,6 +84,7 @@ public class DerbyDBImpl implements Database {
 	@Override
 	public boolean createTable(String tableName, Map<String, String> columnsDescMap) {
 		boolean isCreated = Boolean.FALSE;
+		TableDescriptor tableDescriptor = null;
 		// TODO MJCG Translate this code to Java 8
 		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(tableName).append(" (");
 		for (Iterator<String> iter = columnsDescMap.keySet().iterator(); iter.hasNext();) {
@@ -95,20 +97,38 @@ public class DerbyDBImpl implements Database {
 
 		}
 		sql.append(")");
-		Statement s = null;
+		//Statement s = null;
+		PreparedStatement preparedStatement= null;
 		try {
-			s = conn.createStatement();
+			/*s = conn.createStatement();
 			isCreated = s.execute(sql.toString());
+			*/
+			preparedStatement = conn.prepareStatement(sql.toString());
+			// execute create SQL statement
+			preparedStatement.executeUpdate();
+			
+			//TODO MJCG get statement -> activation -> ac -> ddlTableDescriptor
+			//extract columns description and table name
 
+			EmbedPreparedStatement42 newStmt = (EmbedPreparedStatement42)preparedStatement;
+			
+			if (preparedStatement != null) {
+				//preparedStatement
+			}
+			
 		} catch (SQLException e) {
 			System.err.println("Error creating table");
 			printSQLException(e);
 		} finally {
 			// release all open resources to avoid unnecessary memory usage
 			try {
-				if (s != null) {
+				/*if (s != null) {
 					s.close();
 					s = null;
+				}*/
+				if (preparedStatement!= null) {
+					preparedStatement.close();
+					preparedStatement = null;
 				}
 			} catch (SQLException sqle) {
 				printSQLException(sqle);
@@ -226,11 +246,11 @@ public class DerbyDBImpl implements Database {
 	/* (non-Javadoc)
 	 * @see edu.rit.dao.Database#getExecutionPlan(java.lang.String)
 	 */
-	public ResultSetStatistics getExecutionPlan(String query) {
+	public UnaryOperation getExecutionPlan(String query) {
 		PreparedStatement preparedStatement = null;
-		ResultSetStatistics resultSetStatistics=null;
+		UnaryOperation executionPlan=null;
 		try {
-
+			//TODO MJCG Method in progress
 			if (!(conn instanceof EmbedConnection))
 				return null;
 			
@@ -278,6 +298,6 @@ public class DerbyDBImpl implements Database {
 			}
 		}
 
-		return resultSetStatistics;
+		return executionPlan;
 	}
 }

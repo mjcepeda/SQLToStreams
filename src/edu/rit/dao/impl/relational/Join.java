@@ -3,7 +3,6 @@ package edu.rit.dao.impl.relational;
 import java.util.List;
 
 import edu.rit.dao.iapi.relational.BinaryOperation;
-import edu.rit.dao.iapi.relational.RelationAlgebraOperation;
 import edu.rit.dao.impl.store.access.Qualifier;
 
 /**
@@ -23,8 +22,14 @@ public class Join extends BinaryOperation{
 	 * @param rightSource the right source
 	 * @param qualifiers the qualifiers
 	 */
-	public Join(RelationAlgebraOperation leftSource, RelationAlgebraOperation rightSource, List<Qualifier> qualifiers) {
+	public Join(String leftSource, String rightSource, List<Qualifier> qualifiers) {
 		super(leftSource, rightSource);
 		this.qualifiers = qualifiers;
+	}
+	
+	public String perform() {
+		StringBuilder streamCode = new StringBuilder();
+		//TODO MJCG 
+		return streamCode.toString();
 	}
 }

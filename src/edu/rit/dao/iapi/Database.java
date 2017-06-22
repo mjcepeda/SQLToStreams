@@ -3,7 +3,7 @@ package edu.rit.dao.iapi;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
+import edu.rit.dao.iapi.relational.UnaryOperation;
 
 /**
  * The Interface Database.
@@ -51,6 +51,5 @@ public interface Database {
 	 * @param query the query
 	 * @return the execution plan
 	 */
-	//TODO MJCG Pending change this method for returning our execution plan
-	public ResultSetStatistics getExecutionPlan(String query);
+	public UnaryOperation getExecutionPlan(String query);
 }

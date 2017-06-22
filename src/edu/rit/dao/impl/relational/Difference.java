@@ -1,7 +1,6 @@
 package edu.rit.dao.impl.relational;
 
 import edu.rit.dao.iapi.relational.BinaryOperation;
-import edu.rit.dao.iapi.relational.RelationAlgebraOperation;
 
 /**
  * The Class Difference.
@@ -14,8 +13,15 @@ public class Difference extends BinaryOperation{
 	 * @param leftSource the left source
 	 * @param rightSource the right source
 	 */
-	public Difference(RelationAlgebraOperation leftSource, RelationAlgebraOperation rightSource) {
+	public Difference(String leftSource, String rightSource) {
 		super(leftSource, rightSource);
+	}
+	
+	public String perform() {
+		StringBuilder streamCode = new StringBuilder();
+		streamCode.append(getLeftSource() + ".stream().filter(bean -> !");
+		streamCode.append(getRightSource() + ".contains(bean)).collect(Collectors.toSet());");
+		return streamCode.toString();
 	}
 
 }
