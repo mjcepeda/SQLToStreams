@@ -1,6 +1,7 @@
 package edu.rit.dao.impl.relational;
 
 import edu.rit.dao.iapi.relational.BinaryOperation;
+import edu.rit.dao.iapi.relational.RelationalAlgebra;
 
 /**
  * The Class CartesianProduct.
@@ -13,8 +14,8 @@ public class CartesianProduct extends BinaryOperation{
 	 * @param leftSource the left source
 	 * @param rightSource the right source
 	 */
-	public CartesianProduct(String leftSource, String rightSource) {
-		super(leftSource, rightSource);
+	public CartesianProduct(String leftName, String rightName, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
+		super(leftName, rightName, leftSource, rightSource);
 	}
 	
 	/* (non-Javadoc)
@@ -22,17 +23,9 @@ public class CartesianProduct extends BinaryOperation{
 	 */
 	public String perform() {
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("List<Map<String,Object>> l = new ArrayList<>();");
-		streamCode.append(getLeftSource() + ".forEach(bean1 -> {");
-		streamCode.append(getRightSource() + ".forEach(bean2 -> {");
-		streamCode.append("Map<String, Object> newBean = new HashMap<>();");
-		streamCode.append("Map<String, Object> descbean1 = beanProperties(bean1);");
-		streamCode.append("Map<String, Object> descbean2 = beanProperties(bean2);");
-		streamCode.append("newBean.putAll(descbean1);");
-		streamCode.append("newBean.putAll(descbean2);");
-		streamCode.append("l.add(newBean);");
-		streamCode.append("});});");
-		streamCode.append("return l;");
+		streamCode.append(getLeftBeanName() + ".stream().flatMap(bean1 -> ");
+		streamCode.append(getRightBeanName() + ".stream().map(bean2 -> {");
+		streamCode.append("Map<String, Object> tmp = new HashMap<>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; }))");
 		return streamCode.toString();
 	}
 }

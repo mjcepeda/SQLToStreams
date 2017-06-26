@@ -13,6 +13,11 @@ public class Qualifier {
 	
 	/** The parameter value. */
 	private Object parameterValue;
+	
+	private Boolean negateOperation;
+	//TODO MJCG this solution does not work, remove
+	/** Possible values: "", "and", "or" */
+	private String booleanExpression;
 
 	/**
 	 * Gets the column data.
@@ -66,5 +71,33 @@ public class Qualifier {
 	 */
 	public void setParameterValue(Object parameterValue) {
 		this.parameterValue = parameterValue;
+	}
+
+	/**
+	 * @return the negateOperation
+	 */
+	public Boolean getNegateOperation() {
+		return negateOperation;
+	}
+
+	/**
+	 * @param negateOperation the negateOperation to set
+	 */
+	public void setNegateOperation(Boolean negateOperation) {
+		this.negateOperation = negateOperation;
+	}
+
+	/**
+	 * @return the booleanExpression
+	 */
+	public String getBooleanExpression() {
+		return booleanExpression;
+	}
+
+	/**
+	 * @param booleanExpression the booleanExpression to set
+	 */
+	public void setBooleanExpression(String booleanExpression) {
+		this.booleanExpression = booleanExpression;
 	} 
 }

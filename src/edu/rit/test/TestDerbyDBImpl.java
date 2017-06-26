@@ -1,18 +1,14 @@
 package edu.rit.test;
 
-import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
-
 import edu.rit.dao.iapi.Database;
-import edu.rit.dao.iapi.relational.UnaryOperation;
+import edu.rit.dao.iapi.relational.RelationalAlgebra;
 import edu.rit.dao.impl.DerbyDBImpl;
-import edu.rit.utils.ExecutionPlanParser;
 
 public class TestDerbyDBImpl {
 
@@ -86,7 +82,7 @@ public class TestDerbyDBImpl {
 			put("id", "int");
 		}
 	};
-	
+
 	static Map<String, String> courseTable = new HashMap<String, String>() {
 		{
 			put("title", "varchar(255)");
@@ -95,22 +91,22 @@ public class TestDerbyDBImpl {
 			put("id", "int");
 		}
 	};
-	
+
 	static Map<String, String> sectionTable = new HashMap<String, String>() {
 		{
 			put("semester", "varchar(255)");
 			put("building", "varchar(255)");
 			put("room", "int");
-			//put("year", "int");
+			// put("year", "int");
 			put("idCourse", "int");
 			put("id", "int");
 		}
 	};
-	
+
 	static Map<String, String> teachesTable = new HashMap<String, String>() {
 		{
 			put("semester", "varchar(255)");
-			//put("year", "int");
+			// put("year", "int");
 			put("idSection", "int");
 			put("idCourse", "int");
 			put("id", "int");
@@ -127,29 +123,30 @@ public class TestDerbyDBImpl {
 		schema.put("course", courseTable);
 		schema.put("section", sectionTable);
 		schema.put("teaches", teachesTable);
-		
-		String query = "select p.name, d.name from professor p, department d where p.idDept=d.id and d.budget>9500";
-		UnaryOperation plan = executeQuery(schema, query);
-		
-		
+
+		String query = "select * from professor p, department d where p.idDept=d.id and (p.name='Maria' or d.building='1')";
+		RelationalAlgebra plan = executeQuery(schema, query);
+
 	}
-	//MJCG GenericResultDescription
-	public static UnaryOperation executeQuery(Map<String, Map<String, String>> schema, String query) {
-		UnaryOperation plan = null;
+
+	// MJCG GenericResultDescription
+	public static RelationalAlgebra executeQuery(Map<String, Map<String, String>> schema, String query) {
+		RelationalAlgebra plan = null;
 		Database db = new DerbyDBImpl();
 		db.createDB();
 		schema.entrySet().forEach(t -> db.createTable(t.getKey(), t.getValue()));
-		/*db.createTable("professor", profTable);
-		db.createTable("department", deptTable);
-		db.createTable("course", courseTable);
-		db.createTable("section", sectionTable);
-		db.createTable("teaches", teachesTable);*/
+		/*
+		 * db.createTable("professor", profTable); db.createTable("department",
+		 * deptTable); db.createTable("course", courseTable);
+		 * db.createTable("section", sectionTable); db.createTable("teaches",
+		 * teachesTable);
+		 */
 		// db.insertData("professor", professorsTemp);
-		
+
 		plan = db.getExecutionPlan(query);
 		db.shutdown();
 		db.dropDB();
-		//ExecutionPlanParser.parser(plan);
+		// ExecutionPlanParser.parser(plan);
 		return plan;
 	}
 

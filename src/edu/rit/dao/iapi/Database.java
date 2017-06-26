@@ -3,7 +3,7 @@ package edu.rit.dao.iapi;
 import java.util.List;
 import java.util.Map;
 
-import edu.rit.dao.iapi.relational.UnaryOperation;
+import edu.rit.dao.iapi.relational.RelationalAlgebra;
 
 /**
  * The Interface Database.
@@ -51,5 +51,5 @@ public interface Database {
 	 * @param query the query
 	 * @return the execution plan
 	 */
-	public UnaryOperation getExecutionPlan(String query);
+	public RelationalAlgebra getExecutionPlan(String query);
 }
