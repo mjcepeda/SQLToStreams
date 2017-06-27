@@ -42,7 +42,7 @@ public class CodeGeneratorTest {
 		List<Map<String, Object>> mapProfessors = cg.objectToMaps(data.professors);
 		List<Map<String, Object>> mapDepartments = cg.objectToMaps(data.departments);
 		// execute the query
-		System.out.println("Executing query 1: select * from professors where age >= 34 and gender='M'");
+		System.out.println("Executing query 1: select * from professors where age >= 34 and gender='F'");
 		Stream<Map<String,Object>> st1= st.testSelect(mapProfessors);
 		st1.forEach(System.out::println);
 		System.out.println("Executing query 2: select name, lastName from professors, departments where dept = departments.id and departments.code='CSCI'");
@@ -55,7 +55,7 @@ public class CodeGeneratorTest {
 	public void testCodeGeneration() {
 		// create the data
 		DataSet data = new DataSet();
-		// QUERY : Select * from professors where age >= 34 and gender='M'
+		// QUERY : Select * from professors where age >= 34 and gender='F'
 		// create the query execution plan
 		RelationalAlgebra planQuery1 = createPlan();
 		// get the stream code for the first query
@@ -156,7 +156,7 @@ public class CodeGeneratorTest {
 		List<String> stmts = new ArrayList<>();
 		parser.parser(plan, stmts);
 		Collections.reverse(stmts);
-		String returnStmt = "return " + plan.getReturnVar();
+		String returnStmt = "return " + plan.getReturnVar() + ".get()";
 		stmts.add(returnStmt);
 		return stmts;
 	}

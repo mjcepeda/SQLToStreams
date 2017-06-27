@@ -1,5 +1,9 @@
 package edu.rit.dao.impl.relational;
 
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import edu.rit.dao.iapi.relational.BinaryOperation;
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
 
@@ -29,8 +33,8 @@ public class Union extends BinaryOperation {
 		// TODO MJCG SQL allows duplication, maybe I need to remove the distinct
 		// call
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("Stream<Map<String,Object>> ");
-		streamCode.append(getReturnVar()).append(" = ");
+		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append("Stream.concat(");
 		streamCode.append(getLeftSource().getReturnVar() + ".stream(), ");
 		streamCode.append(getRightSource().getReturnVar() + ".stream()).distinct()");

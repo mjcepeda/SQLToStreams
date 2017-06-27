@@ -23,8 +23,8 @@ public class CartesianProduct extends BinaryOperation{
 	 */
 	public String perform() {
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("Stream<Map<String,Object>> ");
-		streamCode.append(getReturnVar()).append(" = ");
+		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getLeftSource().getReturnVar() + ".stream().flatMap(bean1 -> ");
 		streamCode.append(getRightSource().getReturnVar() + ".stream().map(bean2 -> {");
 		streamCode.append("Map<String, Object> tmp = new HashMap<>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; }))");
