@@ -35,6 +35,9 @@ public class Projection extends UnaryOperation {
 		//TODO MJCG Limitations: name || id
 		//TODO MJCG Do I really need BeanUtils anymore? It is suppose that the entire process works only with maps
 		StringBuilder streamCode = new StringBuilder();
+		streamCode.append("Stream<Map<String,Object>> ");
+		streamCode.append(getReturnVar()).append(" = ");
+		streamCode.append(getSource().getReturnVar());
 		// streamCode.append(getBeanName()+".stream()"
 		streamCode.append(".map(bean -> {");
 		streamCode.append("Map<String, Object> tmp = new HashMap<>();");
@@ -47,7 +50,7 @@ public class Projection extends UnaryOperation {
 		streamCode.append("System.err.println(e.getMessage());");
 		streamCode.append("return null; }");
 		//if we do not return the next map, it gives us an error
-		streamCode.append("return tmp; })");
+		streamCode.append("return tmp; });");
 		return streamCode.toString();
 	}
 

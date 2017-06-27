@@ -6,7 +6,7 @@ package edu.rit.dao.iapi.relational;
 public abstract class UnaryOperation extends RelationalAlgebra{
 
 	/** The table name. */
-	private String beanName;
+	//private String beanName;
 	
 	/** The source. */
 	private RelationalAlgebra source;
@@ -17,7 +17,7 @@ public abstract class UnaryOperation extends RelationalAlgebra{
 	 * @param name the name
 	 */
 	public UnaryOperation(String name, RelationalAlgebra source) {
-		this.beanName = name;
+		super(name);
 		this.source = source;
 	}
 	
@@ -27,20 +27,6 @@ public abstract class UnaryOperation extends RelationalAlgebra{
 	 * @return the string
 	 */
 	public abstract String perform();
-
-	/**
-	 * @return the beanName
-	 */
-	public String getBeanName() {
-		return beanName;
-	}
-
-	/**
-	 * @param beanName the beanName to set
-	 */
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
 
 	/**
 	 * @return the source

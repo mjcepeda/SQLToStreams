@@ -1,6 +1,7 @@
 package edu.rit.dao.impl.stream;
 
 import java.util.IdentityHashMap;
+import java.util.List;
 
 import edu.rit.dao.iapi.relational.BinaryOperation;
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
@@ -29,33 +30,32 @@ public class ExecutionPlanParser {
 		}
 	}
 
-	public String parser(RelationalAlgebra plan) {
+	public void parser(RelationalAlgebra plan, List<String> stmts) {
 		Class<? extends RelationalAlgebra> c = plan.getClass();
 		Class<?> superClass = c.getSuperclass();
-		StringBuilder code = new StringBuilder();
+//		StringBuilder code = new StringBuilder();
+		stmts.add(plan.perform());
 		switch (Classes.fromClass(superClass)) {
 		case UnaryClass:
 			UnaryOperation unaryOP = (UnaryOperation) plan;
 			if (unaryOP.getSource() != null) {
-				code.append(parser(unaryOP.getSource()));
+				parser(unaryOP.getSource(), stmts);
 			}
-			code.append(plan.perform());
 			break;
 		case BinaryClass:
 			BinaryOperation binaryOP = (BinaryOperation) plan;
-			code.append(plan.perform());
+
 			if (binaryOP.getLeftSource() != null) {
-				code.append(parser(binaryOP.getLeftSource()));
+				parser(binaryOP.getLeftSource(), stmts);
 			}
 			if (binaryOP.getRightSource() != null) {
-				code.append(parser(binaryOP.getRightSource()));
+				parser(binaryOP.getRightSource(), stmts);
 			}
 			break;
 		default:
 			// TODO MJCG Handle unknown class
 			break;
 		}
-		return code.toString();
 	}
 
 	// TODO MJCG Change this method to add maybe the type of Collector for

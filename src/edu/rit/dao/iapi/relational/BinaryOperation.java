@@ -6,10 +6,10 @@ package edu.rit.dao.iapi.relational;
 public abstract class BinaryOperation extends RelationalAlgebra{
 
 	/** The left source. */
-	private String leftBeanName;
+	//private String leftBeanName;
 
 	/** The right source. */
-	private String rightBeanName;
+	//private String rightBeanName;
 
 	/** The left source. */
 	private RelationalAlgebra leftSource;
@@ -25,9 +25,8 @@ public abstract class BinaryOperation extends RelationalAlgebra{
 	 * @param leftSource            the left source
 	 * @param rightSource            the right source
 	 */
-	public BinaryOperation(String leftBeanName, String rightBeanName, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
-		this.leftBeanName = leftBeanName;
-		this.rightBeanName = rightBeanName;
+	public BinaryOperation(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
+		super(name);
 		this.leftSource = leftSource;
 		this.rightSource = rightSource;
 	}
@@ -38,42 +37,6 @@ public abstract class BinaryOperation extends RelationalAlgebra{
 	 * @return the string
 	 */
 	public abstract String perform();
-
-	/**
-	 * Gets the left bean name.
-	 *
-	 * @return the leftBeanName
-	 */
-	public String getLeftBeanName() {
-		return leftBeanName;
-	}
-
-	/**
-	 * Sets the left bean name.
-	 *
-	 * @param leftBeanName the leftBeanName to set
-	 */
-	public void setLeftBeanName(String leftBeanName) {
-		this.leftBeanName = leftBeanName;
-	}
-
-	/**
-	 * Gets the right bean name.
-	 *
-	 * @return the rightBeanName
-	 */
-	public String getRightBeanName() {
-		return rightBeanName;
-	}
-
-	/**
-	 * Sets the right bean name.
-	 *
-	 * @param rightBeanName the rightBeanName to set
-	 */
-	public void setRightBeanName(String rightBeanName) {
-		this.rightBeanName = rightBeanName;
-	}
 
 	/**
 	 * Gets the left source.

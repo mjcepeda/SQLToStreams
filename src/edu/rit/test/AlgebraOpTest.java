@@ -1,6 +1,7 @@
 package edu.rit.test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.rit.dao.impl.relational.CartesianProduct;
@@ -9,6 +10,7 @@ import edu.rit.dao.impl.relational.Intersect;
 import edu.rit.dao.impl.relational.Join;
 import edu.rit.dao.impl.relational.Projection;
 import edu.rit.dao.impl.relational.Select;
+import edu.rit.dao.impl.relational.TableAccess;
 import edu.rit.dao.impl.relational.Union;
 import edu.rit.dao.impl.store.access.ColumnDescriptor;
 import edu.rit.dao.impl.store.access.Operator;
@@ -18,13 +20,13 @@ import edu.rit.dao.impl.stream.ExecutionPlanParser;
 public class AlgebraOpTest {
 
 	public static void main(String args[]) {
-		//projection();
+		projection();
 		//union();
 		//intersect();
 		//difference();
 		//cartesianProduct();
 		//join();
-		select();
+		//select();
 	}
 	
 	private static void projection() {
@@ -32,39 +34,45 @@ public class AlgebraOpTest {
 		columnNames.add("name");
 		columnNames.add("lastName");
 		String tableName="professor";
-		Union union = new Union("professor", "teacher", null, null);
-		Projection p = new Projection(tableName, columnNames, union);
+		Union union = new Union("u", new TableAccess("professorStream", null, "professor"), new TableAccess("teacherStream", null, "teacher"));
+		Projection p = new Projection("y", columnNames, union);
 		ExecutionPlanParser parser = new ExecutionPlanParser();
-		String code = parser.parser(p);
-		System.out.println(code.toString());
+		List<String> stmts = new ArrayList<>();
+		parser.parser(p, stmts);
+		Collections.reverse(stmts);
+		System.out.println(stmts);
 	}
 	
 	private static void union() {
-		Union p = new Union("professor", "teacher", null, null);
+		Union p = new Union("u", new TableAccess("professorStream", null, "professor"), new TableAccess("teacherStream", null,"teacher"));
 		ExecutionPlanParser parser = new ExecutionPlanParser();
-		String code = parser.parser(p);
-		System.out.println(code.toString());
+		List<String> stmts = new ArrayList<>();
+		parser.parser(p, stmts);
+		System.out.println(stmts);
 	}
 	
 	private static void intersect() {
-		Intersect p = new Intersect("professor", "teacher", null, null);
+		Intersect p = new Intersect("i", new TableAccess("professorStream", null, "professor"), new TableAccess("teacherStream", null,"teacher"));
 		ExecutionPlanParser parser = new ExecutionPlanParser();
-		String code = parser.parser(p);
-		System.out.println(code.toString());
+		List<String> stmts = new ArrayList<>();
+		parser.parser(p, stmts);
+		System.out.println(stmts);
 	}
 	
 	private static void difference() {
-		Difference p = new Difference("professor", "teacher", null, null);
+		Difference p = new Difference("d", new TableAccess("professorStream", null, "professor"), new TableAccess("teacherStream", null,"teacher"));
 		ExecutionPlanParser parser = new ExecutionPlanParser();
-		String code = parser.parser(p);
-		System.out.println(code.toString());
+		List<String> stmts = new ArrayList<>();
+		parser.parser(p, stmts);
+		System.out.println(stmts);
 	}
 	
 	private static void cartesianProduct() {
-		CartesianProduct cp = new CartesianProduct("professorsTemp", "deptTemp",  null, null);
+		CartesianProduct cp = new CartesianProduct("c", new TableAccess("professorStream", null, "professor"), new TableAccess("teacherStream", null,"teacher"));
 		ExecutionPlanParser parser = new ExecutionPlanParser();
-		String code = parser.parser(cp);
-		System.out.println(code.toString());
+		List<String> stmts = new ArrayList<>();
+		parser.parser(cp, stmts);
+		System.out.println(stmts);
 	}
 	
 	private static void join() {
@@ -75,10 +83,11 @@ public class AlgebraOpTest {
 		q.setColumnData(column);
 		List<Qualifier> l = new ArrayList<>();
 		l.add(q);
-		Join cp = new Join("professorsTemp", "deptTemp",  null, null, l);
+		Join cp = new Join("j",  new TableAccess("professorStream", null, "professor"), new TableAccess("teacherStream", null,"teacher"), l);
 		ExecutionPlanParser parser = new ExecutionPlanParser();
-		String code = parser.parser(cp);
-		System.out.println(code.toString());
+		List<String> stmts = new ArrayList<>();
+		parser.parser(cp, stmts);
+		System.out.println(stmts);
 	}
 
 	private static void select() {
@@ -97,9 +106,10 @@ public class AlgebraOpTest {
 		List<Qualifier> l = new ArrayList<>();
 		l.add(q);
 		l.add(q2);
-		Select cp = new Select("professorsTemp", l, null);
+		Select cp = new Select("s", l, new TableAccess("professorsStream", null, "professorsTemp"));
 		ExecutionPlanParser parser = new ExecutionPlanParser();
-		String code = parser.parser(cp);
-		System.out.println(code.toString());
+		List<String> stmts = new ArrayList<>();
+		parser.parser(cp, stmts);
+		System.out.println(stmts);
 	}
 }

@@ -48,11 +48,10 @@ public class Select extends UnaryOperation {
 		//TODO MJCG Right now, we use the value specified in the SQL statement (i.e "Maria") in the filter operation,
 		//another idea would be create an input parameter as the signature method (i.e name)
 		StringBuilder streamCode = new StringBuilder();
-		if (getSource() != null || getBeanName() == null) {
-			streamCode.append(".filter(bean -> ");
-		} else {
-			streamCode.append(getBeanName()).append(".stream().filter(bean -> ");
-		}
+		streamCode.append("Stream<Map<String,Object>> ");
+		streamCode.append(getReturnVar()).append(" = ");
+		streamCode.append(getSource().getReturnVar()).append(".filter(bean -> ");
+		
 		// TODO MJCG Think about how to store the boolean expression and, or
 		// right now only support and expressions
 		for (Qualifier q : qualifiers) {

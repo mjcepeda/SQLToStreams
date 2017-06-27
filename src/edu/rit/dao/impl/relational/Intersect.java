@@ -14,8 +14,8 @@ public class Intersect extends BinaryOperation{
 	 * @param leftSource the left source
 	 * @param rightSource the right source
 	 */
-	public Intersect(String leftName, String rightName, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
-		super(leftName, rightName, leftSource, rightSource);
+	public Intersect(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
+		super(name, leftSource, rightSource);
 	}
 	
 	/* (non-Javadoc)
@@ -23,8 +23,10 @@ public class Intersect extends BinaryOperation{
 	 */
 	public String perform() {
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append(getLeftBeanName() + ".stream().filter(");
-		streamCode.append(getRightBeanName() + "::contains)");
+		streamCode.append("Stream<Map<String,Object>> ");
+		streamCode.append(getReturnVar()).append(" = ");
+		streamCode.append(getLeftSource().getReturnVar() + ".stream().filter(");
+		streamCode.append(getRightSource().getReturnVar() + "::contains)");
 		return streamCode.toString();
 	}
 

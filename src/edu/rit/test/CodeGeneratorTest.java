@@ -2,6 +2,7 @@ package edu.rit.test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,7 @@ import edu.rit.dao.iapi.relational.RelationalAlgebra;
 import edu.rit.dao.impl.relational.Join;
 import edu.rit.dao.impl.relational.Projection;
 import edu.rit.dao.impl.relational.Select;
+import edu.rit.dao.impl.relational.TableAccess;
 import edu.rit.dao.impl.store.access.ColumnDescriptor;
 import edu.rit.dao.impl.store.access.Operator;
 import edu.rit.dao.impl.store.access.Qualifier;
@@ -25,8 +27,8 @@ import edu.rit.test.stream.StreamQuery;
 
 public class CodeGeneratorTest {
 
-	//@Ignore
-	@Test
+	@Ignore
+	//@Test
 	/**
 	 * Testing the generated query using Stream API
 	 */
@@ -43,13 +45,11 @@ public class CodeGeneratorTest {
 		System.out.println("Executing query 1");
 		st.testSelect(mapProfessors);
 		System.out.println("Executing query 2");
-		st.testProjection(mapProfessors, mapDepartments);
+		//st.testProjection(mapProfessors, mapDepartments);
 	}
 
-	//@Test
-	@Ignore
-	// TODO MJCG Mejorar la query y el método en general, dejarlo lo más claro y
-	// sencillo posible
+	@Test
+	//@Ignore
 	public void testCodeGeneration() {
 		// create the data
 		DataSet data = new DataSet();
@@ -57,21 +57,21 @@ public class CodeGeneratorTest {
 		// create the query execution plan
 		RelationalAlgebra planQuery1 = createPlan();
 		// get the stream code for the first query
-		String query1 = getStreamCode(planQuery1);
+		List<String> query1 = getStreamCode(planQuery1);
 		// QUERY: Select name, lastName from professors, department where dept =
 		// department.id and department.code='CSCI'
 		// create the execution plan query
 		RelationalAlgebra planQuery2 = createPlanProjection();
 		// get the stream code for the second query
-		String query2 = getStreamCode(planQuery2);
+		List<String> query2 = getStreamCode(planQuery2);
 		// get user input parameters
 		List<List<?>> inputParams = new ArrayList<>();
 		inputParams.add(data.getProfessors());
 
 		CodeGenerator generator = new CodeGenerator();
-		MethodSpec method1 = generator.createMethod2("testSelect", query1.toString(), Set.class, data.getProfessors());
-		MethodSpec method2 = generator.createMethod2("testProjection", query2.toString(), Set.class,
-				data.getProfessors(), data.getDepartments());
+		MethodSpec method1 = generator.createMethod2("testSelect", query1, "professors");
+		MethodSpec method2 = generator.createMethod2("testProjection", query2, 
+				"professors", "departments");
 		try {
 			generator.createClass("edu.rit.test.stream", "StreamQuery", method1, method2);
 		} catch (IOException e) {
@@ -102,7 +102,7 @@ public class CodeGeneratorTest {
 		List<Qualifier> l = new ArrayList<>();
 		l.add(q);
 		l.add(q2);
-		Select cp = new Select("professors", l, null);
+		Select cp = new Select("p", l, new TableAccess("professorsStream", null, "professors"));
 		return cp;
 	}
 
@@ -122,7 +122,7 @@ public class CodeGeneratorTest {
 		q.setOperator(Operator.EQUALS);
 		List<Qualifier> l = new ArrayList<>();
 		l.add(q);
-		Select selectPlan = new Select(null, l, null);
+		Select selectPlan = new Select("s", l, new TableAccess("departmentsStream", null, "departments"));
 
 		// creating join plan
 		Qualifier q2 = new Qualifier();
@@ -132,14 +132,14 @@ public class CodeGeneratorTest {
 		q2.setColumnData(column);
 		List<Qualifier> l2 = new ArrayList<>();
 		l2.add(q2);
-		Join join = new Join("professors", "departments", null, selectPlan, l2);
+		Join join = new Join("pd",new TableAccess("professorsStream", null, "professors"), selectPlan, l2);
 
 		// creating projection plan
 		List<String> columnNames = new ArrayList<>();
 		columnNames.add("name");
 		columnNames.add("lastName");
 		String tableName = "professor";
-		Projection p = new Projection(tableName, columnNames, join);
+		Projection p = new Projection("p", columnNames, join);
 		return p;
 	}
 
@@ -149,12 +149,13 @@ public class CodeGeneratorTest {
 	 * @param plan
 	 * @return
 	 */
-	private static String getStreamCode(RelationalAlgebra plan) {
+	private static List<String> getStreamCode(RelationalAlgebra plan) {
 		ExecutionPlanParser parser = new ExecutionPlanParser();
-		String code = parser.parser(plan);
-		StringBuilder finalCode = new StringBuilder("");
-		finalCode.append(code);
-		finalCode.append(".forEach(System.out::println)");
-		return finalCode.toString();
+		List<String> stmts = new ArrayList<>();
+		parser.parser(plan, stmts);
+		Collections.reverse(stmts);
+		String returnStmt = "return " + plan.getReturnVar();
+		stmts.add(returnStmt);
+		return stmts;
 	}
 }

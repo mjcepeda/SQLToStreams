@@ -26,8 +26,8 @@ public class Join extends BinaryOperation {
 	 * @param qualifiers
 	 *            the qualifiers
 	 */
-	public Join(String leftName, String rightName, RelationalAlgebra leftSource, RelationalAlgebra rightSource, List<Qualifier> qualifiers) {
-		super(leftName, rightName, leftSource, rightSource);
+	public Join(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource, List<Qualifier> qualifiers) {
+		super(name, leftSource, rightSource);
 		this.qualifiers = qualifiers;
 	}
 
@@ -41,8 +41,10 @@ public class Join extends BinaryOperation {
 		// TODO MJCG What happens if both maps have the same columns name, to I
 		// need to do the rename
 		// or I will get a rename operation from Derby?
-		streamCode.append(getLeftBeanName() + ".stream().flatMap(bean1 ->");
-		streamCode.append(getRightBeanName() + ".stream()");
+		streamCode.append("Stream<Map<String,Object>> ");
+		streamCode.append(getReturnVar()).append(" = ");
+		streamCode.append(getLeftSource().getReturnVar()).append(".flatMap(bean1 ->");
+		streamCode.append(getRightSource().getReturnVar());
 		if (qualifiers != null) {
 			for (Qualifier qualifier : qualifiers) {
 				streamCode.append(".filter(bean2 -> Objects.equals(bean1.get(\"" + qualifier.getColumnData().getName()

@@ -14,8 +14,8 @@ public class CartesianProduct extends BinaryOperation{
 	 * @param leftSource the left source
 	 * @param rightSource the right source
 	 */
-	public CartesianProduct(String leftName, String rightName, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
-		super(leftName, rightName, leftSource, rightSource);
+	public CartesianProduct(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
+		super(name, leftSource, rightSource);
 	}
 	
 	/* (non-Javadoc)
@@ -23,8 +23,10 @@ public class CartesianProduct extends BinaryOperation{
 	 */
 	public String perform() {
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append(getLeftBeanName() + ".stream().flatMap(bean1 -> ");
-		streamCode.append(getRightBeanName() + ".stream().map(bean2 -> {");
+		streamCode.append("Stream<Map<String,Object>> ");
+		streamCode.append(getReturnVar()).append(" = ");
+		streamCode.append(getLeftSource().getReturnVar() + ".stream().flatMap(bean1 -> ");
+		streamCode.append(getRightSource().getReturnVar() + ".stream().map(bean2 -> {");
 		streamCode.append("Map<String, Object> tmp = new HashMap<>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; }))");
 		return streamCode.toString();
 	}
