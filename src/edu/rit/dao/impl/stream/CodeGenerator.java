@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
 
@@ -27,27 +28,36 @@ public class CodeGenerator {
 
 	/**
 	 * Temporary method created only for testing
+	 * 
 	 * @param name
 	 * @param methodContent
 	 * @param returnType
 	 * @param lists
 	 * @return
 	 */
-	//TODO MJCG remove
-	public MethodSpec createMethod2(String name, String methodContent, Class<?> returnType, List<?>... lists) {
+	// TODO MJCG remove
+	public MethodSpec createMethod2(String name, List<String> stmts, String... params) {
 		// creating parameter List<Map<String,Object>
 		TypeName object = ClassName.get(Object.class);
 		TypeName string = ClassName.get(String.class);
 		TypeName mapOfStringAndObject = ParameterizedTypeName.get(ClassName.get(Map.class), string, object);
 		ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(List.class),
 				mapOfStringAndObject);
-		ParameterSpec parameterSpec = ParameterSpec.builder(parameterizedTypeName, "professors", Modifier.FINAL)
-				.build();
+		ParameterizedTypeName returnTypeName = ParameterizedTypeName.get(ClassName.get(Stream.class),
+				mapOfStringAndObject);
+		
 
 		// creating method
-		MethodSpec.Builder mb = MethodSpec.methodBuilder(name).addModifiers(Modifier.PUBLIC).returns(void.class);
-		mb.addParameter(parameterSpec);
-		mb.addStatement(methodContent);
+		MethodSpec.Builder mb = MethodSpec.methodBuilder(name).addModifiers(Modifier.PUBLIC).returns(returnTypeName);
+		for (String paramName: params) {
+			ParameterSpec parameterSpec = ParameterSpec.builder(parameterizedTypeName, paramName, Modifier.FINAL)
+					.build();
+			mb.addParameter(parameterSpec);
+		}
+		
+		for (String stmt : stmts) {
+			mb.addStatement(stmt);
+		}
 		MethodSpec m = mb.build();
 		return m;
 	}
@@ -80,7 +90,7 @@ public class CodeGenerator {
 	 *            the class name
 	 * @param methods
 	 *            the methods class
-	 * @throws IOException
+	 * @throws IOExceptionstreamClass
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public void createClass(String packageName, String name, MethodSpec... methods) throws IOException {
@@ -88,14 +98,13 @@ public class CodeGenerator {
 		for (MethodSpec m : methods) {
 			streamClass.addMethod(m);
 		}
-		JavaFile javaFile = JavaFile.builder(packageName, streamClass.build()).build();
-		javaFile.writeTo(new File("."));
+		JavaFile javaFile = JavaFile.builder(packageName, streamClass.build()).skipJavaLangImports(true).build();
+		javaFile.writeTo(new File("./src"));
 	}
-	
+
 	/**
 	 * Bean properties. Extract all the attributes names and their values from
-	 * the bean and store them in a Map<String, Object> 
-	 * String = attribute name 
+	 * the bean and store them in a Map<String, Object> String = attribute name
 	 * Object = attribute value
 	 *
 	 * @param bean
