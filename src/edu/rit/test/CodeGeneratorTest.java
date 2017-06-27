@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -27,8 +27,8 @@ import edu.rit.test.stream.StreamQuery;
 
 public class CodeGeneratorTest {
 
-	@Ignore
-	//@Test
+	//@Ignore
+	@Test
 	/**
 	 * Testing the generated query using Stream API
 	 */
@@ -42,14 +42,16 @@ public class CodeGeneratorTest {
 		List<Map<String, Object>> mapProfessors = cg.objectToMaps(data.professors);
 		List<Map<String, Object>> mapDepartments = cg.objectToMaps(data.departments);
 		// execute the query
-		System.out.println("Executing query 1");
-		st.testSelect(mapProfessors);
-		System.out.println("Executing query 2");
-		//st.testProjection(mapProfessors, mapDepartments);
+		System.out.println("Executing query 1: select * from professors where age >= 34 and gender='M'");
+		Stream<Map<String,Object>> st1= st.testSelect(mapProfessors);
+		st1.forEach(System.out::println);
+		System.out.println("Executing query 2: select name, lastName from professors, departments where dept = departments.id and departments.code='CSCI'");
+		Stream<Map<String,Object>> st2= st.testProjection(mapProfessors, mapDepartments);
+		st2.forEach(System.out::println);
 	}
 
-	@Test
-	//@Ignore
+	//@Test
+	@Ignore
 	public void testCodeGeneration() {
 		// create the data
 		DataSet data = new DataSet();
