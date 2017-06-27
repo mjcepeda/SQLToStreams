@@ -50,7 +50,7 @@ public class Projection extends UnaryOperation {
 		streamCode.append("System.err.println(e.getMessage());");
 		streamCode.append("return null; }");
 		//if we do not return the next map, it gives us an error
-		streamCode.append("return tmp; });");
+		streamCode.append("return tmp; })");
 		return streamCode.toString();
 	}
 
