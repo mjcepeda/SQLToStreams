@@ -1,5 +1,6 @@
 package edu.rit.dao.impl;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ParameterMetaData;
@@ -11,20 +12,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.EmbedPreparedStatement42;
+import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
 import org.apache.derby.impl.jdbc.EmbedResultSet42;
 
 import edu.rit.dao.iapi.Database;
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
-import edu.rit.dao.impl.store.access.TableDescriptor;
 
 /**
  * The Class DerbyDBImpl.
  *
  * @author Maria J. Cepeda
  */
-public class DerbyDBImpl implements Database {
+public class DerbyDBImpl {
 
 	/** The db URL. */
 	private static String dbURL = "jdbc:derby:memory:tempDB;create=true";
@@ -36,11 +38,13 @@ public class DerbyDBImpl implements Database {
 	/* (non-Javadoc)
 	 * @see edu.rit.dao.Database#createDB()
 	 */
-	@Override
+	
 	public void createDB() {
 		try {
+			System.setProperty("derby.language.logQueryPlan", "true");
 			// Get a connection
 			conn = DriverManager.getConnection(dbURL);
+			
 		} catch (Exception except) {
 			except.printStackTrace();
 		}
@@ -49,7 +53,7 @@ public class DerbyDBImpl implements Database {
 	/* (non-Javadoc)
 	 * @see edu.rit.dao.Database#dropDB()
 	 */
-	@Override
+	
 	public void dropDB() {
 		try {
 			Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
@@ -80,10 +84,10 @@ public class DerbyDBImpl implements Database {
 	/* (non-Javadoc)
 	 * @see edu.rit.dao.Database#createTable(java.lang.String, java.util.Map)
 	 */
-	@Override
+	
 	public boolean createTable(String tableName, Map<String, String> columnsDescMap) {
 		boolean isCreated = Boolean.FALSE;
-		TableDescriptor tableDescriptor = null;
+		//TableDescriptor tableDescriptor = null;
 		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(tableName).append(" (");
 		for (Iterator<String> iter = columnsDescMap.keySet().iterator(); iter.hasNext();) {
 			String columnName = iter.next();
@@ -101,18 +105,28 @@ public class DerbyDBImpl implements Database {
 			// execute create SQL statement
 			preparedStatement.executeUpdate();
 			
-			//TODO MJCG get statement -> activation -> ac -> ddlTableDescriptor
 			//extract columns description and table name
-			//the resultSet also has the ddlTableDescriptor in the activation attribute
-			EmbedPreparedStatement42 newStmt = (EmbedPreparedStatement42)preparedStatement;
-			
-			if (preparedStatement != null) {
-				//preparedStatement
+			EmbedPreparedStatement stmt42 = (EmbedPreparedStatement)preparedStatement;
+			if ( stmt42 != null) {
+				Field field = stmt42.getClass().getSuperclass().getDeclaredField("activation");
+				field.setAccessible(true);
+				Activation holder =(Activation) field.get(stmt42);
+				TableDescriptor td = holder.getDDLTableDescriptor();
+				//TODO MJCG get statement -> activation -> ac -> ddlTableDescriptor --> columnDescriptorList
+				td.getColumnDescriptorList().forEach(System.out::println);
 			}
 			
 		} catch (SQLException e) {
 			System.err.println("Error creating table");
 			printSQLException(e);
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
 		} finally {
 			// release all open resources to avoid unnecessary memory usage
 			try {
@@ -130,7 +144,7 @@ public class DerbyDBImpl implements Database {
 	/* (non-Javadoc)
 	 * @see edu.rit.dao.Database#insertData(java.lang.String, java.util.List)
 	 */
-	@Override
+	
 	public int[] insertData(String tableName, final List<Map<String, Object>> dataList) {
 		int affectedRows[] = null;
 		StringBuilder sql = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
@@ -184,7 +198,7 @@ public class DerbyDBImpl implements Database {
 	/* (non-Javadoc)
 	 * @see edu.rit.dao.Database#shutdown()
 	 */
-	@Override
+	
 	public void shutdown() {
 		try {
 			// the shutdown=true attribute shuts down Derby
@@ -244,7 +258,7 @@ public class DerbyDBImpl implements Database {
 				return null;
 			
 			EmbedConnection econn = (EmbedConnection) conn;
-			econn.getLanguageConnection().setRunTimeStatisticsMode(Boolean.TRUE);
+			//econn.getLanguageConnection().setRunTimeStatisticsMode(Boolean.TRUE);
 			preparedStatement = conn.prepareStatement(query);
 			ParameterMetaData pmd = preparedStatement.getParameterMetaData();
 			ResultSet rs = preparedStatement.executeQuery();
@@ -252,14 +266,15 @@ public class DerbyDBImpl implements Database {
 			EmbedResultSet42 newRS = (EmbedResultSet42) rs;
 			
 			ResultSetMetaData md = rs.getMetaData();
+			
 			rs.close();
 			
-			/*RunTimeStatisticsImpl rts = (RunTimeStatisticsImpl)econn.getLanguageConnection().getRunTimeStatisticsObject();
-			Field field = rts.getClass().getDeclaredField("topResultSetStatistics");
-			field.setAccessible(true);
-			
-			resultSetStatistics= (ResultSetStatistics) field.get(rts);
-			*/
+//			RunTimeStatisticsImpl rts = (RunTimeStatisticsImpl)econn.getLanguageConnection().getRunTimeStatisticsObject();
+//			Field field = rts.getClass().getDeclaredField("topResultSetStatistics");
+//			field.setAccessible(true);
+//			
+//			ResultSetStatistics resultSetStatistics = (ResultSetStatistics) field.get(rts);
+//			
 			/*System.out.println("-----------------Statement text------------------");
 			System.out.println(rts.getStatementText());
 			System.out.println("-----------------Statement Execution Plan text------------------");
@@ -267,15 +282,15 @@ public class DerbyDBImpl implements Database {
 			*/
 		} catch (SQLException e) {
 			printSQLException(e);
-		} /*catch (NoSuchFieldException e) {
-			System.err.println(e.getMessage());
+		}/* catch (NoSuchFieldException e) {
+			e.printStackTrace();
 		}*/ catch (SecurityException e) {
-			System.err.println(e.getMessage());
+			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			System.err.println(e.getMessage());
-		} /*catch (IllegalAccessException e) {
-			System.err.println(e.getMessage());
-		} */finally {
+			e.printStackTrace();
+		}/* catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}*/ finally {
 			// release all open resources to avoid unnecessary memory usage
 			try {
 				if (preparedStatement != null) {

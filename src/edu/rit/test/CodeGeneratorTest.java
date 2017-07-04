@@ -43,10 +43,11 @@ public class CodeGeneratorTest {
 		List<Map<String, Object>> mapDepartments = cg.objectToMaps(data.departments);
 		// execute the query
 		System.out.println("Executing query 1: select * from professors where age >= 34 and gender='F'");
-		Stream<Map<String,Object>> st1= st.testSelect(mapProfessors);
+		Stream<Map<String, Object>> st1 = st.testSelect(mapProfessors);
 		st1.forEach(System.out::println);
-		System.out.println("Executing query 2: select name, lastName from professors, departments where dept = departments.id and departments.code='CSCI'");
-		Stream<Map<String,Object>> st2= st.testProjection(mapProfessors, mapDepartments);
+		System.out.println(
+				"Executing query 2: select name, lastName from professors, departments where dept = departments.id and departments.code='CSCI'");
+		Stream<Map<String, Object>> st2 = st.testProjection(mapProfessors, mapDepartments);
 		st2.forEach(System.out::println);
 	}
 
@@ -63,7 +64,7 @@ public class CodeGeneratorTest {
 		// QUERY: Select name, lastName from professors, department where dept =
 		// department.id and department.code='CSCI'
 		// create the execution plan query
-		RelationalAlgebra planQuery2 = createPlanProjection();
+		RelationalAlgebra planQuery2 = createPlanProjection2();
 		// get the stream code for the second query
 		List<String> query2 = getStreamCode(planQuery2);
 		// get user input parameters
@@ -72,8 +73,7 @@ public class CodeGeneratorTest {
 
 		CodeGenerator generator = new CodeGenerator();
 		MethodSpec method1 = generator.createMethod2("testSelect", query1, "professors");
-		MethodSpec method2 = generator.createMethod2("testProjection", query2, 
-				"professors", "departments");
+		MethodSpec method2 = generator.createMethod2("testProjection", query2, "professors", "departments");
 		try {
 			generator.createClass("edu.rit.test.stream", "StreamQuery", method1, method2);
 		} catch (IOException e) {
@@ -134,7 +134,7 @@ public class CodeGeneratorTest {
 		q2.setColumnData(column);
 		List<Qualifier> l2 = new ArrayList<>();
 		l2.add(q2);
-		Join join = new Join("pd",new TableAccess("professorsStream", null, "professors"), selectPlan, l2);
+		Join join = new Join("pd", new TableAccess("professorsStream", null, "professors"), selectPlan, l2);
 
 		// creating projection plan
 		List<String> columnNames = new ArrayList<>();
@@ -142,6 +142,39 @@ public class CodeGeneratorTest {
 		columnNames.add("lastName");
 		String tableName = "professor";
 		Projection p = new Projection("p", columnNames, join);
+		return p;
+	}
+
+	private RelationalAlgebra createPlanProjection2() {
+
+		// creating join plan
+		Qualifier q2 = new Qualifier();
+		ColumnDescriptor column = new ColumnDescriptor();
+		column.setName("dept");
+		q2.setParameterValue("id");
+		q2.setColumnData(column);
+		List<Qualifier> l2 = new ArrayList<>();
+		l2.add(q2);
+		Join join = new Join("pd", new TableAccess("professorsStream", null, "professors"),
+				new TableAccess("departmentsStream", null, "departments"), l2);
+
+		// creating select plan
+		Qualifier q = new Qualifier();
+		ColumnDescriptor columnSelect = new ColumnDescriptor();
+		columnSelect.setName("code");
+		q.setParameterValue("CSCI");
+		q.setColumnData(columnSelect);
+		q.setOperator(Operator.EQUALS);
+		List<Qualifier> l = new ArrayList<>();
+		l.add(q);
+		Select selectPlan = new Select("s", l, join);
+
+		// creating projection plan
+		List<String> columnNames = new ArrayList<>();
+		columnNames.add("name");
+		columnNames.add("lastName");
+		String tableName = "professor";
+		Projection p = new Projection("p", columnNames, selectPlan);
 		return p;
 	}
 
