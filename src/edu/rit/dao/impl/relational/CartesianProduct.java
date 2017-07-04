@@ -22,6 +22,7 @@ public class CartesianProduct extends BinaryOperation{
 	 * @see edu.rit.dao.iapi.relational.BinaryOperation#perform()
 	 */
 	public String perform() {
+		// TODO MJCG What happens if both maps have the same columns name
 		StringBuilder streamCode = new StringBuilder();
 		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
@@ -29,5 +30,10 @@ public class CartesianProduct extends BinaryOperation{
 		streamCode.append(getRightSource().getReturnVar() + ".stream().map(bean2 -> {");
 		streamCode.append("Map<String, Object> tmp = new HashMap<>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; }))");
 		return streamCode.toString();
+	}
+	
+	public String toString() {
+		return "Cartesian Product\nbeanName: " + getReturnVar() + "\nleftSource: " + getLeftSource()
+		+ "\nrightSource: " + getRightSource();
 	}
 }

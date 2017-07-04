@@ -1,9 +1,5 @@
 package edu.rit.dao.impl.relational;
 
-import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import edu.rit.dao.iapi.relational.BinaryOperation;
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
 
@@ -41,4 +37,8 @@ public class Union extends BinaryOperation {
 		return streamCode.toString();
 	}
 
+	public String toString() {
+		return "Union\nbeanName: " + getReturnVar() + "\nleftSource: " + getLeftSource()
+				+ "\nrightSource: " + getRightSource();
+	}
 }

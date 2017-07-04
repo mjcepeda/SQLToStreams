@@ -13,7 +13,7 @@ import edu.rit.dao.impl.store.access.Qualifier;
 public class Select extends UnaryOperation {
 
 	/** The att names. */
-	//TODO - MJGC Do I need this?
+	// TODO - MJGC Do I need this?
 	private List<String> attNames;
 
 	private List<Qualifier> qualifiers;
@@ -38,42 +38,39 @@ public class Select extends UnaryOperation {
 	 */
 	public String perform() {
 		// Use Predicate class??
-		// String something = "1234";
-		// String theType = "java.lang.Integer";
-		// Class<?> theClass = Class.forName(theType);
-		// Constructor<?> cons = theClass.getConstructor(String.class);
-		// Object ob = cons.newInstance(something);
-		// System.out.println(ob.equals(1234));
-		//TODO Method in progress
-		//TODO MJCG Right now, we use the value specified in the SQL statement (i.e "Maria") in the filter operation,
-		//another idea would be create an input parameter as the signature method (i.e name)
+		// TODO Method in progress
+		// TODO MJCG Right now, we use the value specified in the SQL statement
+		// (i.e "Maria") in the filter operation,
+		// another idea would be create an input parameter as the signature
+		// method (i.e name)
 		StringBuilder streamCode = new StringBuilder();
 		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getSource().getReturnVar()).append(".get().filter(bean -> ");
-		
+
 		// TODO MJCG Think about how to store the boolean expression and, or
 		// right now only support and expressions
 		for (Qualifier q : qualifiers) {
-			//if it is not the first elements, include the and operator
+			// if it is not the first elements, include the and operator
 			if (!q.equals(qualifiers.stream().findFirst().get())) {
 				streamCode.append(" && ");
 			}
-			//TODO MJCG Think if I need to use here BeanUtils
+			// TODO MJCG Think if I need to use here BeanUtils
 			StringBuilder predicate = new StringBuilder();
 			Class<?> type = q.getParameterValue().getClass();
-			//adding casting type
+			// adding casting type
 			predicate.append("((").append(type.getSimpleName()).append(")");
 			predicate.append("bean.get(\"").append(q.getColumnData().getName()).append("\"))").append(".compareTo(");
-			//checking parameter type for including "" or not inside the method compareTo
+			// checking parameter type for including "" or not inside the method
+			// compareTo
 			if (String.class.isAssignableFrom(q.getParameterValue().getClass())) {
 				predicate.append("\"").append(q.getParameterValue()).append("\")");
 			} else {
 				predicate.append(q.getParameterValue()).append(")");
 			}
 			predicate.append(getOperator(q.getOperator()));
-			//checking negation expression
-			if (q.getNegateOperation()!= null && q.getNegateOperation().equals(Boolean.TRUE)) {
+			// checking negation expression
+			if (q.getNegateOperation() != null && q.getNegateOperation().equals(Boolean.TRUE)) {
 				streamCode.append("!(").append(predicate).append(")");
 			} else {
 				streamCode.append(predicate);
@@ -81,6 +78,11 @@ public class Select extends UnaryOperation {
 		}
 		streamCode.append(")");
 		return streamCode.toString();
+	}
+
+	// TODO MJCG
+	public String toString() {
+		return "";
 	}
 
 	private String getOperator(int operator) {

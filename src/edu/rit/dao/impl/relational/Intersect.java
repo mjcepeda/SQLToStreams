@@ -6,19 +6,23 @@ import edu.rit.dao.iapi.relational.RelationalAlgebra;
 /**
  * The Class Intersect.
  */
-public class Intersect extends BinaryOperation{
+public class Intersect extends BinaryOperation {
 
 	/**
 	 * Instantiates a new intersect.
 	 *
-	 * @param leftSource the left source
-	 * @param rightSource the right source
+	 * @param leftSource
+	 *            the left source
+	 * @param rightSource
+	 *            the right source
 	 */
 	public Intersect(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
 		super(name, leftSource, rightSource);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see edu.rit.dao.iapi.relational.BinaryOperation#perform()
 	 */
 	public String perform() {
@@ -30,4 +34,8 @@ public class Intersect extends BinaryOperation{
 		return streamCode.toString();
 	}
 
+	// TODO MJCG
+	public String toString() {
+		return "";
+	}
 }

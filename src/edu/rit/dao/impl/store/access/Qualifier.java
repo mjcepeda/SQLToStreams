@@ -99,5 +99,9 @@ public class Qualifier {
 	 */
 	public void setBooleanExpression(String booleanExpression) {
 		this.booleanExpression = booleanExpression;
-	} 
+	}
+	
+	public String toString() {
+		return columnData.getName() + Operator.getOperator(operator) + parameterValue;
+	}
 }

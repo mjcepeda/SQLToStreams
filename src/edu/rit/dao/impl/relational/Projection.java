@@ -32,8 +32,9 @@ public class Projection extends UnaryOperation {
 	 * @return the string
 	 */
 	public String perform() {
-		//TODO MJCG Limitations: name || id
-		//TODO MJCG Do I really need BeanUtils anymore? It is suppose that the entire process works only with maps
+		// TODO MJCG Limitations: name || id
+		// TODO MJCG Do I really need BeanUtils anymore? It is suppose that the
+		// entire process works only with maps
 		StringBuilder streamCode = new StringBuilder();
 		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
@@ -49,9 +50,14 @@ public class Projection extends UnaryOperation {
 		streamCode.append("} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {");
 		streamCode.append("System.err.println(e.getMessage());");
 		streamCode.append("return null; }");
-		//if we do not return the next map, it gives us an error
+		// if we do not return the next map, it gives us an error
 		streamCode.append("return tmp; })");
 		return streamCode.toString();
+	}
+
+	public String toString() {
+		return "Projection\n\tbeanName: " + getReturnVar() + "\n\tcolumns: " + attNames
+				+ "\n\tsource: " + getSource();
 	}
 
 	/**

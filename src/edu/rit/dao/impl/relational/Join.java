@@ -47,13 +47,20 @@ public class Join extends BinaryOperation {
 		streamCode.append(getRightSource().getReturnVar());
 		if (qualifiers != null) {
 			for (Qualifier qualifier : qualifiers) {
-				streamCode.append(".get().filter(bean2 -> Objects.equals(bean1.get(\"" + qualifier.getColumnData().getName()
-						+ "\"), bean2.get(\"" + qualifier.getParameterValue() + "\"))).map(bean2 -> {");
+				streamCode.append(
+						".get().filter(bean2 -> Objects.equals(bean1.get(\"" + qualifier.getColumnData().getName()
+								+ "\"), bean2.get(\"" + qualifier.getParameterValue() + "\"))).map(bean2 -> {");
 				streamCode.append(
 						"Map<String, Object> tmp = new HashMap<String, Object>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; })");
 			}
 		}
 		streamCode.append(")");
 		return streamCode.toString();
+	}
+
+	// TODO MJCG
+	public String toString() {
+		return "Join\nbeanName: " + getReturnVar() + "\n\tcolumns: " + qualifiers + "\nleftSource: " + getLeftSource()
+		+ "\nrightSource: " + getRightSource();
 	}
 }
