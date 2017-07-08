@@ -4,6 +4,7 @@ import java.util.List;
 
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
 import edu.rit.dao.iapi.relational.UnaryOperation;
+import edu.rit.dao.impl.store.access.ColumnDescriptor;
 import edu.rit.dao.impl.store.access.Operator;
 import edu.rit.dao.impl.store.access.Qualifier;
 
@@ -44,7 +45,7 @@ public class Select extends UnaryOperation {
 		// another idea would be create an input parameter as the signature
 		// method (i.e name)
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getSource().getReturnVar()).append(".get().filter(bean -> ");
 
@@ -57,17 +58,14 @@ public class Select extends UnaryOperation {
 			}
 			// TODO MJCG Think if I need to use here BeanUtils
 			StringBuilder predicate = new StringBuilder();
-			Class<?> type = q.getParameterValue().getClass();
-			// adding casting type
-			predicate.append("((").append(type.getSimpleName()).append(")");
-			predicate.append("bean.get(\"").append(q.getColumnData().getName()).append("\"))").append(".compareTo(");
-			// checking parameter type for including "" or not inside the method
-			// compareTo
-			if (String.class.isAssignableFrom(q.getParameterValue().getClass())) {
-				predicate.append("\"").append(q.getParameterValue()).append("\")");
+			predicate.append("((Comparable)bean.get(\"").append(q.getColumnData().getName()).append("\")").append(").compareTo(");
+			if (q.getParameterValue() instanceof ColumnDescriptor) {
+				//comparing two attributes
+				predicate.append("bean.get(\"").append(((ColumnDescriptor)q.getParameterValue()).getName()).append("\"))");
 			} else {
+				//comparing attribute against a value
 				predicate.append(q.getParameterValue()).append(")");
-			}
+			}			
 			predicate.append(getOperator(q.getOperator()));
 			// checking negation expression
 			if (q.getNegateOperation() != null && q.getNegateOperation().equals(Boolean.TRUE)) {
@@ -80,9 +78,8 @@ public class Select extends UnaryOperation {
 		return streamCode.toString();
 	}
 
-	// TODO MJCG
 	public String toString() {
-		return "";
+		return "Select\nbeanName: " + getReturnVar() + "\n\tcolumns: " + qualifiers + "\nsource: " + getSource();
 	}
 
 	private String getOperator(int operator) {

@@ -14,7 +14,7 @@ public class TableAccess extends UnaryOperation{
 
 	public String perform() {
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(tableName).append(".stream()");
 		return streamCode.toString();

@@ -9,6 +9,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
 import adipe.translate.Queries;
 import adipe.translate.Schemas;
 import adipe.translate.TranslationException;
@@ -17,17 +22,23 @@ import adipe.translate.ra.Terms;
 import edu.rit.dao.iapi.Database;
 import edu.rit.dao.iapi.relational.BinaryOperation;
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
+import edu.rit.dao.impl.parser.ExprLexer;
+import edu.rit.dao.impl.parser.ExprParser;
+import edu.rit.dao.impl.parser.PredicateListener;
 import edu.rit.dao.impl.relational.CartesianProduct;
 import edu.rit.dao.impl.relational.Difference;
 import edu.rit.dao.impl.relational.Join;
 import edu.rit.dao.impl.relational.Projection;
+import edu.rit.dao.impl.relational.Select;
 import edu.rit.dao.impl.relational.TableAccess;
 import edu.rit.dao.impl.relational.Union;
 import edu.rit.dao.impl.store.access.ColumnDescriptor;
 import edu.rit.dao.impl.store.access.Operator;
 import edu.rit.dao.impl.store.access.Qualifier;
 import edu.rit.utils.Utils;
+import ra.OneArgTerm;
 import ra.Term;
+import ra.TwoArgTerm;
 
 public class DatabaseImpl implements Database {
 
@@ -42,8 +53,10 @@ public class DatabaseImpl implements Database {
 	public static final String UNION = "union";
 	public static final String DIFF = "diffset";
 	public static final String CARTPROD = "cartprod";
-
+	
+	//index for every column
 	private Map<Integer, String> attributesOrder;
+	//contains the information about tables and column names
 	private TreeMap schemaColumnNames;
 	private int counter = 1;
 
@@ -60,9 +73,9 @@ public class DatabaseImpl implements Database {
 		try {
 			Term t = Queries.getRaOf(schema, query);
 			System.out.println(Terms.indent(t));
-			
+
 			if (t != null) {
-				//TODO MJCG Relocate this code
+				// TODO MJCG Relocate this code
 				Field field = Utils.getField(schema.getClass(), "instantiatedTables");
 				Field fieldColumns = Utils.getField(schema.getClass(), "columnNames");
 				TreeSet tree = (TreeSet) field.get(schema);
@@ -160,25 +173,25 @@ public class DatabaseImpl implements Database {
 				qualifier.setOperator(Operator.EQUALS);
 				List<Qualifier> qualifiers = new ArrayList<>();
 				qualifiers.add(qualifier);
-				//updating attributes order
+				// updating attributes order
 				List<String> attOrder = new ArrayList<>();
-				attOrder.add(columnsLeftSource.get(indexColunmLeft-1));
-	            for (int i = 0; i < columnsLeftSource.size(); ++i) {
-	                if (i + 1 != indexColunmLeft) {
-	                	attOrder.add(columnsLeftSource.get(i));
-	                }
-	            }
-	            for (int i = 0; i < columnsRightSource.size(); ++i) {
-	                if (i + 1 != indexColunmRight) {
-	                	attOrder.add(columnsRightSource.get(i));
-	                }
-	            }
-	            counter =1;
-	            attributesOrder = new HashMap<>();
-	            for (String s: attOrder) {
-	            	attributesOrder.put(counter, s);
-	            	counter++;
-	            }
+				attOrder.add(columnsLeftSource.get(indexColunmLeft - 1));
+				for (int i = 0; i < columnsLeftSource.size(); ++i) {
+					if (i + 1 != indexColunmLeft) {
+						attOrder.add(columnsLeftSource.get(i));
+					}
+				}
+				for (int i = 0; i < columnsRightSource.size(); ++i) {
+					if (i + 1 != indexColunmRight) {
+						attOrder.add(columnsRightSource.get(i));
+					}
+				}
+				counter = 1;
+				attributesOrder = new HashMap<>();
+				for (String s : attOrder) {
+					attributesOrder.put(counter, s);
+					counter++;
+				}
 
 				ra = new Join(Utils.randomIdentifier(EQJOIN), bo.getLeftSource(), bo.getRightSource(), qualifiers);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -187,8 +200,15 @@ public class DatabaseImpl implements Database {
 
 			break;
 		case GENJOIN:
+			//Implement it like a cartesian product with a select
 			bo = binaryOperation(schema, term);
-			
+			raSource = new CartesianProduct(Utils.randomIdentifier(CARTPROD), bo.getLeftSource(), bo.getRightSource());
+			ra = new Select(Utils.randomIdentifier("select"), parsePredicate(term), raSource);
+			break;
+		case FILTER:
+			raSource = parseOperation(schema, getSource(term));
+			List<Qualifier> qualifiers = parsePredicate(term);
+			ra = new Select(Utils.randomIdentifier("select"), qualifiers, raSource);
 			break;
 		default:
 			// TODO MJCG Handle unknown class
@@ -200,45 +220,49 @@ public class DatabaseImpl implements Database {
 	private BinaryOperation binaryOperation(Schema schema, Term term) {
 		BinaryOperation bo = null;
 		// two sources, left and right
-		Field sourceField = Utils.getField(term.getClass().getSuperclass(), "xstreamTrick");
-		try {
-			List<Term> sources = (List<Term>) sourceField.get(term);
-			if (sources != null && !sources.isEmpty()) {
-				RelationalAlgebra leftSource = parseOperation(schema, sources.get(0));
-				RelationalAlgebra rightSource = parseOperation(schema, sources.get(1));
-				bo = new BinaryOperation(null, leftSource, rightSource) {
+		// Field sourceField = Utils.getField(term.getClass().getSuperclass(),
+		// "xstreamTrick");
+		// try {
+		// TODO MJCG Check if superClass is TwoArgTerm
+		TwoArgTerm twoTerms = (TwoArgTerm) term;
+		// List<Term> sources = (List<Term>) sourceField.get(term);
+		// if (sources != null && !sources.isEmpty()) {
+		RelationalAlgebra leftSource = parseOperation(schema, twoTerms.getInputTerm1());
+		RelationalAlgebra rightSource = parseOperation(schema, twoTerms.getInputTerm2());
+		bo = new BinaryOperation(null, leftSource, rightSource) {
 
-					@Override
-					public String toString() {
-						// TODO Auto-generated method stub
-						return null;
-					}
-
-					@Override
-					public String perform() {
-						// TODO Auto-generated method stub
-						return null;
-					}
-				};
+			@Override
+			public String toString() {
+				// TODO Auto-generated method stub
+				return null;
 			}
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
+
+			@Override
+			public String perform() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+		// }
+		/*
+		 * } catch (IllegalArgumentException | IllegalAccessException e) {
+		 * e.printStackTrace(); }
+		 */
 		return bo;
 	}
 
 	private Term getSource(Term term) {
-		Term source = null;
-		Field sourceField = Utils.getField(term.getClass().getSuperclass(), "xstreamTrick");
-		try {
-			List<Term> sources = (List<Term>) sourceField.get(term);
-			if (sources != null && !sources.isEmpty()) {
-				source = sources.get(0);
-			}
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		return source;
+		// TODO MJCG Check if superClass is OneArgTerm
+		OneArgTerm oneAgr = (OneArgTerm) term;
+		return oneAgr.getInputTerm();
+		/*
+		 * Term source = null; Field sourceField =
+		 * Utils.getField(term.getClass().getSuperclass(), "xstreamTrick"); try
+		 * { List<Term> sources = (List<Term>) sourceField.get(term); if
+		 * (sources != null && !sources.isEmpty()) { source = sources.get(0); }
+		 * } catch (IllegalArgumentException | IllegalAccessException e) {
+		 * e.printStackTrace(); } return source;
+		 */
 	}
 
 	private String createTableStatement(String tableName, Map<String, String> columnsDescMap) {
@@ -255,4 +279,27 @@ public class DatabaseImpl implements Database {
 		return sql.toString();
 	}
 
+	private List<Qualifier> parsePredicate(Term term) {
+		//creating the listener
+		PredicateListener listener = new PredicateListener(attributesOrder);
+		//getting the predicate value from the term object
+		Field predicateField = Utils.getField(term.getClass(), "predicate");
+		String predicate;
+		try {
+			predicate = (String) predicateField.get(term);
+			//init the parser
+			ANTLRInputStream in = new ANTLRInputStream(predicate);
+			ExprLexer lexer = new ExprLexer(in);
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			ExprParser parser = new ExprParser(tokens);
+			//parsing the predicate tree
+			ParserRuleContext context = parser.predicate();
+			ParseTreeWalker walker = new ParseTreeWalker();
+			walker.walk(listener, context);
+			
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return listener.getQualifiers();
+	}
 }

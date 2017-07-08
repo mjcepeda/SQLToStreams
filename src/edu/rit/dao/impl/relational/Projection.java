@@ -36,18 +36,17 @@ public class Projection extends UnaryOperation {
 		// TODO MJCG Do I really need BeanUtils anymore? It is suppose that the
 		// entire process works only with maps
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getSource().getReturnVar());
-		// streamCode.append(getBeanName()+".stream()"
 		streamCode.append(".get().map(bean -> {");
-		streamCode.append("Map<String, Object> tmp = new HashMap<>();");
+		streamCode.append("Map<String, Object> tmp = new java.util.HashMap<>();");
 		streamCode.append("try {");
 		for (String columnName : attNames) {
-			streamCode.append("tmp.put(\"").append(columnName).append("\", BeanUtils.getProperty(bean, \"")
+			streamCode.append("tmp.put(\"").append(columnName).append("\", org.apache.commons.beanutils.BeanUtils.getProperty(bean, \"")
 					.append(columnName).append("\"));");
 		}
-		streamCode.append("} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {");
+		streamCode.append("} catch (IllegalAccessException | java.lang.reflect.InvocationTargetException | NoSuchMethodException e) {");
 		streamCode.append("System.err.println(e.getMessage());");
 		streamCode.append("return null; }");
 		// if we do not return the next map, it gives us an error

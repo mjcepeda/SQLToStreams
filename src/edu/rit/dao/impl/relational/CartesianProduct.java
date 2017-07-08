@@ -24,11 +24,11 @@ public class CartesianProduct extends BinaryOperation{
 	public String perform() {
 		// TODO MJCG What happens if both maps have the same columns name
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
-		streamCode.append(getLeftSource().getReturnVar() + ".stream().flatMap(bean1 -> ");
-		streamCode.append(getRightSource().getReturnVar() + ".stream().map(bean2 -> {");
-		streamCode.append("Map<String, Object> tmp = new HashMap<>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; }))");
+		streamCode.append(getLeftSource().getReturnVar() + ".get().flatMap(bean1 -> ");
+		streamCode.append(getRightSource().getReturnVar() + ".get().map(bean2 -> {");
+		streamCode.append("Map<String, Object> tmp = new java.util.HashMap<>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; }))");
 		return streamCode.toString();
 	}
 	

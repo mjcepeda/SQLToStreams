@@ -1,6 +1,9 @@
 package edu.rit.dao.impl.stream;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Scanner;
 
 import edu.rit.dao.iapi.Database;
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
@@ -12,6 +15,17 @@ public class Translator {
 	
 	public void readFile(String fileName) {
 		//open the file
+		File file = new File(fileName);
+		//creating scanner instance to read file
+		try {
+			Scanner scanner = new Scanner(file);
+			while (scanner.hasNextLine()){
+				
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
 		//read the query, input params and output param
 		//
 	}

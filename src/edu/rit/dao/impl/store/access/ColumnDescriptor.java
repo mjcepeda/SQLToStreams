@@ -16,7 +16,7 @@ public class ColumnDescriptor {
 	private String tableName;
 	
 	/** The type. */
-	private DataType type;
+	//private DataType type;
 	
 	/**
 	 * Gets the id.
@@ -72,21 +72,24 @@ public class ColumnDescriptor {
 		this.tableName = tableName;
 	}
 	
+	public String toString() {
+		return name;
+	}
 	/**
 	 * Gets the type.
 	 *
 	 * @return the type
 	 */
-	public DataType getType() {
-		return type;
-	}
-	
-	/**
-	 * Sets the type.
-	 *
-	 * @param type the new type
-	 */
-	public void setType(DataType type) {
-		this.type = type;
-	}
+//	public DataType getType() {
+//		return type;
+//	}
+//	
+//	/**
+//	 * Sets the type.
+//	 *
+//	 * @param type the new type
+//	 */
+//	public void setType(DataType type) {
+//		this.type = type;
+//	}
 }

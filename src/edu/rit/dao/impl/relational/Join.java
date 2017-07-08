@@ -41,7 +41,7 @@ public class Join extends BinaryOperation {
 		// TODO MJCG What happens if both maps have the same columns name, to I
 		// need to do the rename
 		// or I will get a rename operation from Derby?
-		streamCode.append("Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getLeftSource().getReturnVar()).append(".get().flatMap(bean1 ->");
 		streamCode.append(getRightSource().getReturnVar());

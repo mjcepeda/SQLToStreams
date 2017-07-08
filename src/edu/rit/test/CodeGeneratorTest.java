@@ -42,12 +42,12 @@ public class CodeGeneratorTest {
 		List<Map<String, Object>> mapProfessors = cg.objectToMaps(data.professors);
 		List<Map<String, Object>> mapDepartments = cg.objectToMaps(data.departments);
 		// execute the query
-		System.out.println("Executing query 1: select * from professors where age >= 34 and gender='F'");
-		Stream<Map<String, Object>> st1 = st.testSelect(mapProfessors);
-		st1.forEach(System.out::println);
+//		System.out.println("Executing query 1: select * from professors where age >= 34 and gender='F'");
+//		Stream<Map<String, Object>> st1 = st.testSelect(mapProfessors);
+//		st1.forEach(System.out::println);
 		System.out.println(
 				"Executing query 2: select name, lastName from professors, departments where dept = departments.id and departments.code='CSCI'");
-		Stream<Map<String, Object>> st2 = st.testProjection(mapProfessors, mapDepartments);
+		Stream<Map<String, Object>> st2 = st.test(mapProfessors, mapDepartments);
 		st2.forEach(System.out::println);
 	}
 
@@ -68,8 +68,8 @@ public class CodeGeneratorTest {
 		// get the stream code for the second query
 		List<String> query2 = getStreamCode(planQuery2);
 		// get user input parameters
-		List<List<?>> inputParams = new ArrayList<>();
-		inputParams.add(data.getProfessors());
+//		List<List<?>> inputParams = new ArrayList<>();
+//		inputParams.add(data.getProfessors());
 
 		CodeGenerator generator = new CodeGenerator();
 		MethodSpec method1 = generator.createMethod2("testSelect", query1, "professors");

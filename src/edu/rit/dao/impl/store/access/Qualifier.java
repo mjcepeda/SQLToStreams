@@ -101,7 +101,7 @@ public class Qualifier {
 		this.booleanExpression = booleanExpression;
 	}
 	
-	public String toString() {
+	public String toString() {		
 		return columnData.getName() + Operator.getOperator(operator) + parameterValue;
 	}
 }
