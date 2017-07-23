@@ -33,10 +33,8 @@ public class Projection extends UnaryOperation {
 	 */
 	public String perform() {
 		// TODO MJCG Limitations: name || id
-		// TODO MJCG Do I really need BeanUtils anymore? It is suppose that the
-		// entire process works only with maps
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getSource().getReturnVar());
 		streamCode.append(".get().map(bean -> {");

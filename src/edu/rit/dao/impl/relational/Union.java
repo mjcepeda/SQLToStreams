@@ -26,14 +26,12 @@ public class Union extends BinaryOperation {
 	 * @see edu.rit.dao.iapi.relational.BinaryOperation#perform()
 	 */
 	public String perform() {
-		// TODO MJCG SQL allows duplication, maybe I need to remove the distinct
-		// call
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append("Stream.concat(");
 		streamCode.append(getLeftSource().getReturnVar() + ".stream(), ");
-		streamCode.append(getRightSource().getReturnVar() + ".stream()).distinct()");
+		streamCode.append(getRightSource().getReturnVar() + ".stream())");
 		return streamCode.toString();
 	}
 

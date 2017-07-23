@@ -2,9 +2,11 @@ package edu.rit.test.data;
 
 public class Department {
 
-	public final int id;
-	public final String code;
-	public final String deptName;
+	private int id;
+	private String code;
+	private String deptName;
+	
+	public Department() {}
 	
 	public Department(int id, String code, String name) {
 		this.id = id;

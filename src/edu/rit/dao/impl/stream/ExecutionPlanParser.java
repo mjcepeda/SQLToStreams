@@ -33,7 +33,6 @@ public class ExecutionPlanParser {
 	public void parser(RelationalAlgebra plan, List<String> stmts) {
 		Class<? extends RelationalAlgebra> c = plan.getClass();
 		Class<?> superClass = c.getSuperclass();
-//		StringBuilder code = new StringBuilder();
 		stmts.add(plan.perform());
 		switch (Classes.fromClass(superClass)) {
 		case UnaryClass:
@@ -53,18 +52,7 @@ public class ExecutionPlanParser {
 			}
 			break;
 		default:
-			// TODO MJCG Handle unknown class
 			break;
 		}
-	}
-
-	// TODO MJCG Change this method to add maybe the type of Collector for
-	// generating
-	public String generateCollector(boolean distinct) {
-		String code = ".collect(Collectors.toList());";
-		if (distinct) {
-			code = ".collect(Collectors.toSet());";
-		}
-		return code;
 	}
 }

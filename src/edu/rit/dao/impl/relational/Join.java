@@ -41,24 +41,23 @@ public class Join extends BinaryOperation {
 		// TODO MJCG What happens if both maps have the same columns name, to I
 		// need to do the rename
 		// or I will get a rename operation from Derby?
-		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getLeftSource().getReturnVar()).append(".get().flatMap(bean1 ->");
 		streamCode.append(getRightSource().getReturnVar());
 		if (qualifiers != null) {
 			for (Qualifier qualifier : qualifiers) {
 				streamCode.append(
-						".get().filter(bean2 -> Objects.equals(bean1.get(\"" + qualifier.getColumnData().getName()
+						".get().filter(bean2 -> java.util.Objects.equals(bean1.get(\"" + qualifier.getColumnData().getName()
 								+ "\"), bean2.get(\"" + qualifier.getParameterValue() + "\"))).map(bean2 -> {");
 				streamCode.append(
-						"Map<String, Object> tmp = new HashMap<String, Object>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; })");
+						"Map<String, Object> tmp = new java.util.HashMap<String, Object>(); tmp.putAll(bean1); tmp.putAll(bean2); return tmp; })");
 			}
 		}
 		streamCode.append(")");
 		return streamCode.toString();
 	}
 
-	// TODO MJCG
 	public String toString() {
 		return "Join\nbeanName: " + getReturnVar() + "\n\tcolumns: " + qualifiers + "\nleftSource: " + getLeftSource()
 		+ "\nrightSource: " + getRightSource();

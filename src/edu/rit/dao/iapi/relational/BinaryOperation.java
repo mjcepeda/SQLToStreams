@@ -6,12 +6,6 @@ package edu.rit.dao.iapi.relational;
 public abstract class BinaryOperation extends RelationalAlgebra{
 
 	/** The left source. */
-	//private String leftBeanName;
-
-	/** The right source. */
-	//private String rightBeanName;
-
-	/** The left source. */
 	private RelationalAlgebra leftSource;
 	
 	/** The right source. */

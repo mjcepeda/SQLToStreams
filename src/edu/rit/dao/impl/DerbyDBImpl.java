@@ -112,7 +112,6 @@ public class DerbyDBImpl {
 				field.setAccessible(true);
 				Activation holder =(Activation) field.get(stmt42);
 				TableDescriptor td = holder.getDDLTableDescriptor();
-				//TODO MJCG get statement -> activation -> ac -> ddlTableDescriptor --> columnDescriptorList
 				td.getColumnDescriptorList().forEach(System.out::println);
 			}
 			
@@ -253,7 +252,6 @@ public class DerbyDBImpl {
 		PreparedStatement preparedStatement = null;
 		RelationalAlgebra executionPlan=null;
 		try {
-			//TODO MJCG Method in progress
 			if (!(conn instanceof EmbedConnection))
 				return null;
 			

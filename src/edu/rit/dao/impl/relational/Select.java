@@ -13,11 +13,7 @@ import edu.rit.dao.impl.store.access.Qualifier;
  */
 public class Select extends UnaryOperation {
 
-	/** The att names. */
-	// TODO - MJGC Do I need this?
-	private List<String> attNames;
-
-	private List<Qualifier> qualifiers;
+	private List<List<Qualifier>> predicate;
 
 	/**
 	 * Instantiates a new select.
@@ -27,9 +23,9 @@ public class Select extends UnaryOperation {
 	 * @param attNames
 	 *            the att names
 	 */
-	public Select(String name, List<Qualifier> qualifiers, RelationalAlgebra source) {
+	public Select(String name, List<List<Qualifier>> predicate, RelationalAlgebra source) {
 		super(name, source);
-		this.qualifiers = qualifiers;
+		this.predicate = predicate;
 	}
 
 	/*
@@ -40,49 +36,58 @@ public class Select extends UnaryOperation {
 	public String perform() {
 		// Use Predicate class??
 		// TODO Method in progress
-		// TODO MJCG Right now, we use the value specified in the SQL statement
-		// (i.e "Maria") in the filter operation,
-		// another idea would be create an input parameter as the signature
-		// method (i.e name)
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
-		streamCode.append(getSource().getReturnVar()).append(".get().filter(bean -> ");
+		streamCode.append(getSource().getReturnVar()).append(".get()");
 
 		// TODO MJCG Think about how to store the boolean expression and, or
 		// right now only support and expressions
-		for (Qualifier q : qualifiers) {
-			// if it is not the first elements, include the and operator
-			if (!q.equals(qualifiers.stream().findFirst().get())) {
-				streamCode.append(" && ");
+		for (List<Qualifier> l : predicate) {
+			streamCode.append(".filter(bean -> ");
+			for (Qualifier q : l) {
+				String attName = q.getColumnData().getAlias() != null ? q.getColumnData().getAlias(): q.getColumnData().getName(); 
+				// if it is not the first elements, include the and operator
+				if (!q.equals(l.stream().findFirst().get())) {
+					streamCode.append(" || ");
+				}
+				// TODO MJCG Include possible null in ParameterValue INDEX(0,-1)
+				StringBuilder predicate = new StringBuilder();
+				if (q.getParameterValue() != null) {
+					predicate.append("(bean.get(\"").append(attName).append("\") != null ? ");
+					predicate.append("((Comparable)bean.get(\"").append(attName).append("\")")
+							.append(").compareTo(");
+					if (q.getParameterValue() instanceof ColumnDescriptor) {
+						// comparing two attributes
+						predicate.append("bean.get(\"").append(((ColumnDescriptor) q.getParameterValue()).getName())
+								.append("\"))");
+					} else {
+						// comparing attribute against a value
+						predicate.append(q.getParameterValue()).append(")");
+					}
+					predicate.append(getOperatorForCompareTo(q.getOperator()));
+					predicate.append(" : false)");
+				} else {
+					predicate.append("bean.get(\"").append(attName).append("\")").append(getOperator(q.getOperator())).append("null");
+				}
+				// checking negation expression
+				if (q.getNegateOperation() != null && q.getNegateOperation().equals(Boolean.TRUE)) {
+					streamCode.append("!(").append(predicate).append(")");
+				} else {
+					streamCode.append(predicate);
+				}
 			}
-			// TODO MJCG Think if I need to use here BeanUtils
-			StringBuilder predicate = new StringBuilder();
-			predicate.append("((Comparable)bean.get(\"").append(q.getColumnData().getName()).append("\")").append(").compareTo(");
-			if (q.getParameterValue() instanceof ColumnDescriptor) {
-				//comparing two attributes
-				predicate.append("bean.get(\"").append(((ColumnDescriptor)q.getParameterValue()).getName()).append("\"))");
-			} else {
-				//comparing attribute against a value
-				predicate.append(q.getParameterValue()).append(")");
-			}			
-			predicate.append(getOperator(q.getOperator()));
-			// checking negation expression
-			if (q.getNegateOperation() != null && q.getNegateOperation().equals(Boolean.TRUE)) {
-				streamCode.append("!(").append(predicate).append(")");
-			} else {
-				streamCode.append(predicate);
-			}
+			streamCode.append(")");
 		}
-		streamCode.append(")");
+		
 		return streamCode.toString();
 	}
 
 	public String toString() {
-		return "Select\nbeanName: " + getReturnVar() + "\n\tcolumns: " + qualifiers + "\nsource: " + getSource();
+		return "Select\nbeanName: " + getReturnVar() + "\n\tcolumns: " + predicate + "\nsource: " + getSource();
 	}
 
-	private String getOperator(int operator) {
+	private String getOperatorForCompareTo(int operator) {
 		String operatorCode = null;
 		switch (operator) {
 		case Operator.EQUALS:
@@ -106,23 +111,31 @@ public class Select extends UnaryOperation {
 		}
 		return operatorCode;
 	}
-
-	/**
-	 * Gets the att names.
-	 *
-	 * @return the attNames
-	 */
-	public List<String> getAttNames() {
-		return attNames;
+	
+	private String getOperator(int operator) {
+		String operatorCode = null;
+		switch (operator) {
+		case Operator.EQUALS:
+			operatorCode = "==";
+			break;
+		case Operator.DISTINCT:
+			operatorCode = "!=";
+			break;
+		case Operator.GRE:
+			operatorCode = ">";
+			break;
+		case Operator.GREQ:
+			operatorCode = ">=";
+			break;
+		case Operator.LESS:
+			operatorCode = "<";
+			break;
+		case Operator.LEQ:
+			operatorCode = "<=";
+			break;
+		}
+		return operatorCode;
 	}
 
-	/**
-	 * Sets the att names.
-	 *
-	 * @param attNames
-	 *            the attNames to set
-	 */
-	public void setAttNames(List<String> attNames) {
-		this.attNames = attNames;
-	}
+
 }

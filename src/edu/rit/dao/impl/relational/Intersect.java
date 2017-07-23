@@ -27,7 +27,7 @@ public class Intersect extends BinaryOperation {
 	 */
 	public String perform() {
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
+		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getLeftSource().getReturnVar() + ".stream().filter(");
 		streamCode.append(getRightSource().getReturnVar() + "::contains)");

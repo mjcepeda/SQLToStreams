@@ -9,18 +9,23 @@ public class Professor {
 	public String lastName;
 	public int age;
 	public String gender; // M - male, F - female
-	public BigDecimal salary;
+	public Integer salary;
 	public int dept;
 	
 	public Professor(){}
 	
-	public Professor(String name, String lastName, int age, String gender, int dept, int id) {
+	public Professor(String name, String lastName, int age, String gender, int dept, int id, Integer salary) {
 		this.name = name;
 		this.lastName = lastName;
 		this.age = age;
 		this.gender = gender;
 		this.dept= dept;
 		this.id = id;
+		this.salary=salary;
+	}
+	
+	public String toString() {
+		return "Id: " + id + ", Name: " + name + " Last Name: " + lastName;
 	}
 	/**
 	 * @return the id
@@ -85,13 +90,13 @@ public class Professor {
 	/**
 	 * @return the salary
 	 */
-	public BigDecimal getSalary() {
+	public Integer getSalary() {
 		return salary;
 	}
 	/**
 	 * @param salary the salary to set
 	 */
-	public void setSalary(BigDecimal salary) {
+	public void setSalary(Integer salary) {
 		this.salary = salary;
 	}
 

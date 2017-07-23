@@ -3,7 +3,6 @@ package edu.rit.test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,17 +49,18 @@ public class DatabaseImplTest {
 		//String query = "select name, code from professor p, department d where d.id = p.dept";
 		String query = "select p.name, p.lastName from professor p inner join department d on d.id = p.dept and code='CSCI' and age > 50";
 		//String query = "select name || lastName from professor p"; //Create SelectT term
-		//TODO MJCG Create a map with column types and pass this map as an argument to getExecutionPlan
-		//we need this information for Select operation
-		RelationalAlgebra plan = db.getExecutionPlan(query, schema);
-		System.out.println(plan);
-		CodeGenerator generator = new CodeGenerator();
-		MethodSpec method2 = generator.createMethod2("test", getStreamCode(plan), "professor", "department");
-		try {
-			generator.createClass("edu.rit.test.stream", "StreamQuery", method2);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//		RelationalAlgebra plan = db.getExecutionPlan(query, schema);
+//		System.out.println(plan);
+//		CodeGenerator generator = new CodeGenerator();
+//		MethodSpec method2 = generator.createMethod2("test", getStreamCode(plan), "professor", "department");
+//		
+//			generator.createClass("edu.rit.test.stream", "StreamQuery", method2);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	/**

@@ -5,7 +5,7 @@ import edu.rit.dao.iapi.relational.UnaryOperation;
 
 public class TableAccess extends UnaryOperation{
 	
-	String tableName;
+	private String tableName;
 	
 	public TableAccess(String beanName, RelationalAlgebra source, String tableName) {
 		super(beanName, source);
@@ -14,9 +14,9 @@ public class TableAccess extends UnaryOperation{
 
 	public String perform() {
 		StringBuilder streamCode = new StringBuilder();
-		streamCode.append("java.util.function.Supplier<Stream<Map<String, Object>>> ");
-		streamCode.append(getReturnVar()).append(" = () ->");
-		streamCode.append(tableName).append(".stream()");
+		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
+		streamCode.append(getReturnVar()).append(" = () -> userObjToMap(");
+		streamCode.append(tableName).append(").stream()");
 		return streamCode.toString();
 	}
 	
@@ -24,4 +24,11 @@ public class TableAccess extends UnaryOperation{
 		return "TableAccess\n\tbeanName: " + getReturnVar() + "\n\ttableName: " + tableName
 				+ "\n\tsource: " + getSource();
 	}
+	
+	/**
+	 * @return the tableName
+	 */
+	public String getTableName() {
+		return tableName;
+	}	
 }

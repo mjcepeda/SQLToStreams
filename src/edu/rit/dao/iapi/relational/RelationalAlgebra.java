@@ -1,11 +1,15 @@
 package edu.rit.dao.iapi.relational;
 
+import java.util.Map;
+
+import edu.rit.dao.impl.store.access.ColumnDescriptor;
+
 public abstract class RelationalAlgebra {
 
 	private String returnVar;
 	
-	//TODO MJCG Create an attributeOrder i.e [name, lastName, age, gender]
-
+	private Map<Integer, ColumnDescriptor> attOrder;
+	
 	public RelationalAlgebra(String returnVar) {
 		this.returnVar = returnVar;
 	}
@@ -24,5 +28,19 @@ public abstract class RelationalAlgebra {
 	 */
 	public String getReturnVar() {
 		return returnVar;
+	}
+
+	/**
+	 * @return the attOrder
+	 */
+	public Map<Integer, ColumnDescriptor> getAttOrder() {
+		return attOrder;
+	}
+
+	/**
+	 * @param attOrder the attOrder to set
+	 */
+	public void setAttOrder(Map<Integer, ColumnDescriptor> attOrder) {
+		this.attOrder = attOrder;
 	}
 }

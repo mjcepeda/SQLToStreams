@@ -1,6 +1,5 @@
 // Generated from Expr.g4 by ANTLR 4.3
 package edu.rit.dao.impl.parser;
-
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -52,6 +51,17 @@ public interface ExprListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitC(@NotNull ExprParser.CContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link ExprParser#err}.
+	 * @param ctx the parse tree
+	 */
+	void enterErr(@NotNull ExprParser.ErrContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ExprParser#err}.
+	 * @param ctx the parse tree
+	 */
+	void exitErr(@NotNull ExprParser.ErrContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link ExprParser#id}.

@@ -11,9 +11,11 @@ public class ColumnDescriptor {
 	/** The name. */
 	private String name;
 	
-	//TODO MJCG Field necessary? Redundancy 
 	/** The table name. */
 	private String tableName;
+	
+	//TODO MJCG Add alias field
+	private String alias;
 	
 	/** The type. */
 	//private DataType type;
@@ -75,6 +77,21 @@ public class ColumnDescriptor {
 	public String toString() {
 		return name;
 	}
+
+	/**
+	 * @return the alias
+	 */
+	public String getAlias() {
+		return alias;
+	}
+
+	/**
+	 * @param alias the alias to set
+	 */
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+	
 	/**
 	 * Gets the type.
 	 *

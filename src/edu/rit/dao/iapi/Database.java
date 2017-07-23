@@ -57,5 +57,5 @@ public interface Database {
 	
 	public Schema createSchema(Map<String, Map<String, String>> schemaDescriptor);
 	
-	public RelationalAlgebra getExecutionPlan(String query, Schema schema);
+	public RelationalAlgebra getExecutionPlan(String query, Schema schema) throws Exception;
 }

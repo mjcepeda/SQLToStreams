@@ -141,7 +141,4 @@ public class TestDerbyDBImpl {
 		sql.append(");");
 		return sql.toString();
 	}
-
-	//TODO MJCG https://sourceforge.net/p/sqltoalgebra/wiki/Home/
-	
 }

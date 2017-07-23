@@ -9,11 +9,14 @@ predicate:	a
 a:	'AND('predicate','predicate')';
 o:	'OR('predicate','predicate')';
 n:	'NOT('c')';
-c: 	id op id;
+c: 	err 
+	| id op id;
+err: 'ISERR('INT')'; /* columnName is null*/
 id:	INT 
-	| TEXT;
+	| TEXT | NULL;
 INT:	'#'?[0-9]+;
 TEXT:	'"'[A-Za-z]+'"';
+NULL: 'INDEX(0,-1)'; /* columnName = null*/
 op:		'=' 
 	| '>' 
 	| '<' 
