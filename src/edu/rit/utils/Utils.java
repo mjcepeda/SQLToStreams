@@ -15,14 +15,26 @@ import java.util.Set;
 
 import edu.rit.dao.impl.store.access.UserDTO;
 
+/**
+ * The Class Utils.
+ */
 public class Utils {
 	
+	/** The Constant lexicon. */
 	final static String lexicon = "ABCDEFGHIJKLMNOPQRSTUVWXYZ12345674890";
 
+	/** The Constant rand. */
 	final static java.util.Random rand = new java.util.Random();
 
+	/** The Constant identifiers. */
 	final static Set<String> identifiers = new HashSet<String>();
 
+	/**
+	 * Random identifier.
+	 *
+	 * @param name the name
+	 * @return the string
+	 */
 	public static String randomIdentifier(String name) {
 		 StringBuilder builder = new StringBuilder(name);
 		 builder.append(randomIdentifier());
@@ -30,8 +42,8 @@ public class Utils {
 	}
 		
 	/**
-	 * Object to maps. Transform user objects to Map<String, Object> String =
-	 * attribute name Object = attribute value
+	 * Object to maps. Transform user DTOs to Map<String, Object> 
+	 * String = attribute name Object = attribute value
 	 *
 	 * @param objs
 	 *            the objs
@@ -48,6 +60,12 @@ public class Utils {
 		return schema;
 	}
 
+	/**
+	 * Schema descriptor.
+	 *
+	 * @param userObjs the user objs
+	 * @return the map
+	 */
 	public static Map<String, Map<String, String>> schemaDescriptor(List<UserDTO> userObjs) {
 		Map<String, Map<String, String>> schema = new HashMap<>();
 		for (UserDTO bean : userObjs) {
@@ -61,8 +79,8 @@ public class Utils {
 
 	/**
 	 * Bean properties. Extract all the attributes names and their values from
-	 * the bean and store them in a Map<String, Object> String = attribute name
-	 * Object = attribute value
+	 * the bean and store them in a Map<String, Object> 
+	 * String = attribute name, Object = attribute value
 	 *
 	 * @param bean
 	 *            the bean
@@ -88,6 +106,13 @@ public class Utils {
 		}
 	}
 
+	/**
+	 * Table descriptor.
+	 * Build DDL statement for creating a database relation with the bean structure
+	 *
+	 * @param bean the bean
+	 * @return the map
+	 */
 	public static Map<String, String> tableDescriptor(Object bean) {
 		try {
 			Map<String, String> map = new HashMap<>();
@@ -117,6 +142,13 @@ public class Utils {
 		}
 	}
 	
+	/**
+	 * Gets the field.
+	 *
+	 * @param cl the cl
+	 * @param fieldName the field name
+	 * @return the field
+	 */
 	public static Field getField(Class<?> cl, String fieldName) {
 		Field field = null;
 		try {
@@ -128,6 +160,11 @@ public class Utils {
 		return field;
 	}
 	
+	/**
+	 * Random identifier.
+	 *
+	 * @return the string
+	 */
 	private static String randomIdentifier() {
 	    StringBuilder builder = new StringBuilder();
 	    while(builder.toString().length() == 0) {

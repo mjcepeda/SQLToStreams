@@ -1,18 +1,30 @@
 package edu.rit.test.data;
 
+/**
+ * The Class Course.
+ */
 public class Course {
 	
+	/** The id. */
 	private int id;
 	
+	/** The title. */
 	private String title;
 	
+	/** The dept name. */
 	private String dept_name;
 	
+	/** The credits. */
 	private int credits;
 	
+	/**
+	 * Instantiates a new course.
+	 */
 	public Course(){}
 	
 	/**
+	 * Gets the id.
+	 *
 	 * @return the id
 	 */
 	public int getId() {
@@ -20,6 +32,8 @@ public class Course {
 	}
 
 	/**
+	 * Sets the id.
+	 *
 	 * @param id the id to set
 	 */
 	public void setId(int id) {
@@ -27,6 +41,8 @@ public class Course {
 	}
 
 	/**
+	 * Gets the title.
+	 *
 	 * @return the title
 	 */
 	public String getTitle() {
@@ -34,6 +50,8 @@ public class Course {
 	}
 
 	/**
+	 * Sets the title.
+	 *
 	 * @param title the title to set
 	 */
 	public void setTitle(String title) {
@@ -41,6 +59,8 @@ public class Course {
 	}
 
 	/**
+	 * Gets the dept name.
+	 *
 	 * @return the dept_name
 	 */
 	public String getDept_name() {
@@ -48,6 +68,8 @@ public class Course {
 	}
 
 	/**
+	 * Sets the dept name.
+	 *
 	 * @param dept_name the dept_name to set
 	 */
 	public void setDept_name(String dept_name) {
@@ -55,6 +77,8 @@ public class Course {
 	}
 
 	/**
+	 * Gets the credits.
+	 *
 	 * @return the credits
 	 */
 	public int getCredits() {
@@ -62,6 +86,8 @@ public class Course {
 	}
 
 	/**
+	 * Sets the credits.
+	 *
 	 * @param credits the credits to set
 	 */
 	public void setCredits(int credits) {
