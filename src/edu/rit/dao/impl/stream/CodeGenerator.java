@@ -12,9 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import javax.lang.model.element.Modifier;
+
+import org.apache.commons.collections.map.HashedMap;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -38,15 +39,16 @@ public class CodeGenerator {
 		TypeName mapOfStringAndObject = ParameterizedTypeName.get(ClassName.get(Map.class), string, object);
 		ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(List.class),
 				mapOfStringAndObject);
-		//the return type is a List
+		// the return type is a List
 		ParameterizedTypeName returnTypeName = ParameterizedTypeName.get(ClassName.get(List.class), returnType);
 
 		// creating method
 		MethodSpec.Builder mb = MethodSpec.methodBuilder(name).addModifiers(Modifier.PUBLIC).returns(returnTypeName);
 		for (UserDTO param : params) {
 			TypeName paramType = ClassName.get(param.getDto().getClass());
-			//input parameters type is Collection<UserDTO>
-			ParameterizedTypeName parameterizedList = ParameterizedTypeName.get(ClassName.get(Collection.class), paramType);
+			// input parameters type is Collection<UserDTO>
+			ParameterizedTypeName parameterizedList = ParameterizedTypeName.get(ClassName.get(Collection.class),
+					paramType);
 			ParameterSpec parameterSpec = ParameterSpec.builder(parameterizedList, param.getName(), Modifier.FINAL)
 					.build();
 			mb.addParameter(parameterSpec);
@@ -55,11 +57,47 @@ public class CodeGenerator {
 		for (String stmt : stmts) {
 			mb.addStatement(stmt);
 		}
-		
+
 		MethodSpec m = mb.build();
 		return m;
 	}
 
+	public MethodSpec userDTOtoMap(String dtoName) {
+		// extracting the package
+		int i = dtoName.lastIndexOf(".");
+		String pck = dtoName.substring(0, i > -1 ? i : 0);
+		String simpleName = dtoName.substring(dtoName.lastIndexOf(".") + 1).toLowerCase();
+		// building return type List<Map<String,Object>>
+		TypeName object = ClassName.get(Object.class);
+		TypeName string = ClassName.get(String.class);
+		TypeName mapOfStringAndObject = ParameterizedTypeName.get(ClassName.get(Map.class), string, object);
+		ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(List.class),
+				mapOfStringAndObject);
+		// defining method signature
+		MethodSpec.Builder mb = MethodSpec.methodBuilder(simpleName + "ToMap").addModifiers(Modifier.PRIVATE)
+				.returns(parameterizedTypeName);
+		try {
+			// input parameters type is Collection<UserDTO>
+			Class c = Class.forName(dtoName);
+			TypeName paramType = ClassName.get(c);
+			Object bean = c.newInstance();
+			ParameterizedTypeName parameterizedList = ParameterizedTypeName.get(ClassName.get(Collection.class),
+					paramType);
+			ParameterSpec parameterSpec = ParameterSpec.builder(parameterizedList, simpleName, Modifier.FINAL).build();
+			mb.addParameter(parameterSpec);
+			// adding the statements into the method
+			mb.addStatement("List<Map<String, Object>> tableData = new java.util.ArrayList<>()");
+			mb.addStatement(simpleName + ".forEach(bean -> { Map<String, Object> m = new java.util.HashMap()");
+			beanProperties(bean, mb, simpleName);
+			mb.addStatement("tableData.add(m); }); return tableData");
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+		// building the method
+		MethodSpec m = mb.build();
+		return m;
+	}
 
 	/**
 	 * Object to maps. Transform user objects to Map<String, Object> String =
@@ -69,26 +107,26 @@ public class CodeGenerator {
 	 *            the objs
 	 * @return the list
 	 */
-	public List<Map<String, Object>> objectToMaps(List<?> objs) {
-		List<Map<String, Object>> schema = new ArrayList<>();
-		for (Object bean : objs) {
-			Map<String, Object> tmpTable = beanProperties(bean);
-			if (tmpTable != null) {
-				schema.add(tmpTable);
-			}
-		}
-		return schema;
-	}
+	// public List<Map<String, Object>> objectToMaps(List<?> objs) {
+	// List<Map<String, Object>> schema = new ArrayList<>();
+	// for (Object bean : objs) {
+	// Map<String, Object> tmpTable = beanProperties(bean);
+	// if (tmpTable != null) {
+	// schema.add(tmpTable);
+	// }
+	// }
+	// return schema;
+	// }
 
 	public void createClass(String packageName, String name, List<MethodSpec> methods) throws IOException {
 		TypeSpec.Builder streamClass = TypeSpec.classBuilder(name).addModifiers(Modifier.PUBLIC);
 		for (MethodSpec m : methods) {
 			streamClass.addMethod(m);
 		}
-		MethodSpec m = createMethodUserObjToMaps();
-		streamClass.addMethod(m);
-		MethodSpec methodBeanProperties = createMethodBeanProperties();
-		streamClass.addMethod(methodBeanProperties);
+//		MethodSpec m = createMethodUserObjToMaps();
+//		streamClass.addMethod(m);
+//		MethodSpec methodBeanProperties = createMethodBeanProperties();
+//		streamClass.addMethod(methodBeanProperties);
 		JavaFile javaFile = JavaFile.builder(packageName, streamClass.build()).skipJavaLangImports(true).build();
 		javaFile.writeTo(new File("./src"));
 	}
@@ -102,7 +140,7 @@ public class CodeGenerator {
 	 *            the bean
 	 * @return the map
 	 */
-	private Map<String, Object> beanProperties(Object bean) {
+	private Map<String, Object> beanProperties(Object bean, MethodSpec.Builder mb, String name) {
 		try {
 			Map<String, Object> map = new HashMap<>();
 			Arrays.asList(Introspector.getBeanInfo(bean.getClass(), Object.class).getPropertyDescriptors()).stream()
@@ -112,6 +150,7 @@ public class CodeGenerator {
 							Object value = pd.getReadMethod().invoke(bean);
 							// if (value != null) {
 							map.put(pd.getName(), value);
+							mb.addStatement("m.put(\"" + pd.getName() + "\", bean." + pd.getReadMethod().getName() + "())");
 							// }
 						} catch (Exception e) {
 							System.err.println(e.getMessage());
@@ -123,7 +162,7 @@ public class CodeGenerator {
 			return Collections.emptyMap();
 		}
 	}
-	
+
 	private MethodSpec createMethodUserObjToMaps() {
 		// building return type List<Map<String,Object>>
 		TypeName object = ClassName.get(Object.class);
@@ -134,7 +173,7 @@ public class CodeGenerator {
 		// defining method signature
 		MethodSpec.Builder mb = MethodSpec.methodBuilder("userObjToMap").addModifiers(Modifier.PRIVATE)
 				.returns(parameterizedTypeName);
-		//input parameters type is Collection<UserDTO>
+		// input parameters type is Collection<UserDTO>
 		ParameterizedTypeName parameterizedList = ParameterizedTypeName.get(ClassName.get(Collection.class),
 				WildcardTypeName.subtypeOf(Object.class));
 		ParameterSpec parameterSpec = ParameterSpec.builder(parameterizedList, "table", Modifier.FINAL).build();

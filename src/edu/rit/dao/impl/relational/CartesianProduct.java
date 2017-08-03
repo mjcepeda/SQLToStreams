@@ -10,9 +10,11 @@ import edu.rit.utils.Utils;
  */
 public class CartesianProduct extends BinaryOperation{
 
+	
 	/**
 	 * Instantiates a new cartesian product.
 	 *
+	 * @param name the name
 	 * @param leftSource the left source
 	 * @param rightSource the right source
 	 */
@@ -52,6 +54,9 @@ public class CartesianProduct extends BinaryOperation{
 		return streamCode.toString();
 	}
 	
+	/* (non-Javadoc)
+	 * @see edu.rit.dao.iapi.relational.RelationalAlgebra#toString()
+	 */
 	public String toString() {
 		return "Cartesian Product\nbeanName: " + getReturnVar() + "\nleftSource: " + getLeftSource()
 		+ "\nrightSource: " + getRightSource();

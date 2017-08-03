@@ -18,6 +18,14 @@ public class ExprBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements E
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitClause(@NotNull ExprParser.ClauseContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitPredicate(@NotNull ExprParser.PredicateContext ctx) { return visitChildren(ctx); }
 
 	/**

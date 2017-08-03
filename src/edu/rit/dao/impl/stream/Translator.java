@@ -39,8 +39,8 @@ public class Translator {
 	private static final String VOID_TYPE = "void";
 	private static final String QUERY = "query";
 
-	//TODO MJCG Test queries with null and not null
-	private static ClassDescriptor readFile(String fileName) {
+	// TODO MJCG Test queries with null and not null
+	public static ClassDescriptor readFile(String fileName) {
 		ClassDescriptor classDescriptor = null;
 		Configuration config = null;
 		List<String> list = new ArrayList<>();
@@ -94,7 +94,7 @@ public class Translator {
 		return classDescriptor;
 	}
 
-	//TODO MJCG Test negation
+	// TODO MJCG Test negation
 	public static void translate(String fileName) {
 		List<MethodSpec> methodsSpec = new ArrayList<>();
 		// reading the user file
@@ -111,29 +111,45 @@ public class Translator {
 				// executing the query and getting the execution plan for that
 				// query
 				RelationalAlgebra plan = db.getExecutionPlan(method.getQuery(), schema);
-				// parsing the plan and getting the stream java code pipeline
-				// statements
-				List<String> stmts = getCode(plan, method.getOutputParam());
-				String returnType = method.getOutputParam();
-				Object returnObj = null;
+				if (plan != null) {
+					// parsing the plan and getting the stream java code
+					// pipeline
+					// statements
+					List<String> stmts = getCode(plan, method.getOutputParam());
+					String returnType = method.getOutputParam();
 
-				Class c = Class.forName(returnType.trim());
-				returnObj = c.newInstance();
+					Class c = Class.forName(returnType.trim());
+					Object returnObj = c.newInstance();
 
-				// generating the stream java code for this method
-				MethodSpec ms = generator.createMethod(method.getMethodName(), stmts, params, returnObj);
-				// adding the method to the list
-				methodsSpec.add(ms);
+					// generating the stream java code for this method
+					MethodSpec ms = generator.createMethod(method.getMethodName(), stmts, params, returnObj);
+					// adding the method to the list
+					methodsSpec.add(ms);
+				} else {
+					System.err.println("Error translating query :" + method.getQuery());
+				}
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		// creating list with all different input DTOs for this class
+		List<String> paramsTypes = new ArrayList<>();
+		for (MethodDescriptor m : classDefinition.getMethods()) {
+			m.getInputParams().forEach(i -> {
+				if (!paramsTypes.contains(i)) {
+					paramsTypes.add(i.trim());
+				}
+			});
+		}
+		paramsTypes.forEach(p -> {
+			methodsSpec.add(generator.userDTOtoMap(p));
+		});
 		// extracting the package
 		int i = classDefinition.getAbsoluteName().lastIndexOf(".");
 		String pck = classDefinition.getAbsoluteName().substring(0, i > -1 ? i : 0);
-		
+
 		String cls = classDefinition.getAbsoluteName()
 				.substring(classDefinition.getAbsoluteName().lastIndexOf(".") + 1);
 		// creating the class
@@ -144,17 +160,20 @@ public class Translator {
 		}
 	}
 
-	private static List<UserDTO> getInputParameters(MethodDescriptor methodDescriptor) {
+	public static List<UserDTO> getInputParameters(MethodDescriptor methodDescriptor) {
 		return methodDescriptor.getInputParams().stream().map(m -> {
 			String inputName = m.substring(m.lastIndexOf(".") + 1).toLowerCase();
 			Class c;
 			UserDTO udto = null;
 			try {
-				//TODO MJCG Ver si puedo crear objecto cuando no tiene constructor por defecto
+				// TODO MJCG DTOs must have default constructor
 				c = Class.forName(m.trim());
 				Object obj = c.newInstance();
 				udto = new UserDTO(inputName, obj);
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+					| IllegalArgumentException e
+			/* | InvocationTargetException e */) {
+				System.err.println("Perhaps the default constructor is missing");
 				e.printStackTrace();
 			}
 			return udto;

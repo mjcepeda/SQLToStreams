@@ -1,7 +1,5 @@
 package edu.rit.test.data;
 
-import java.math.BigDecimal;
-
 public class Professor {
 
 	public int id;
@@ -13,6 +11,15 @@ public class Professor {
 	public int dept;
 	
 	public Professor(){}
+	
+	public Professor(String name, String lastName, int dept, int id, Integer salary) {
+		this.name = name;
+		this.lastName = lastName;
+		this.dept= dept;
+		this.id = id;
+		this.salary=salary;
+	}
+	
 	
 	public Professor(String name, String lastName, int age, String gender, int dept, int id, Integer salary) {
 		this.name = name;

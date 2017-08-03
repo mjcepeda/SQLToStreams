@@ -14,6 +14,9 @@ public class Department {
 		this.deptName= name;
 	}
 
+	public String toString() {
+		return "name: " + deptName + " , code: " + code;
+	}
 	/**
 	 * @return the id
 	 */

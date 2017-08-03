@@ -14,10 +14,9 @@ public abstract class BinaryOperation extends RelationalAlgebra{
 	/**
 	 * Instantiates a new binary operation.
 	 *
-	 * @param leftBeanName the left bean name
-	 * @param rightBeanName the right bean name
-	 * @param leftSource            the left source
-	 * @param rightSource            the right source
+	 * @param name the name
+	 * @param leftSource the left source
+	 * @param rightSource the right source
 	 */
 	public BinaryOperation(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
 		super(name);

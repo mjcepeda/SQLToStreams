@@ -9,6 +9,17 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface ExprListener extends ParseTreeListener {
 	/**
+	 * Enter a parse tree produced by {@link ExprParser#clause}.
+	 * @param ctx the parse tree
+	 */
+	void enterClause(@NotNull ExprParser.ClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ExprParser#clause}.
+	 * @param ctx the parse tree
+	 */
+	void exitClause(@NotNull ExprParser.ClauseContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link ExprParser#predicate}.
 	 * @param ctx the parse tree
 	 */

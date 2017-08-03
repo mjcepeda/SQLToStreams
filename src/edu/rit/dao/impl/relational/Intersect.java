@@ -11,10 +11,9 @@ public class Intersect extends BinaryOperation {
 	/**
 	 * Instantiates a new intersect.
 	 *
-	 * @param leftSource
-	 *            the left source
-	 * @param rightSource
-	 *            the right source
+	 * @param name the name
+	 * @param leftSource the left source
+	 * @param rightSource the right source
 	 */
 	public Intersect(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
 		super(name, leftSource, rightSource);
@@ -29,12 +28,14 @@ public class Intersect extends BinaryOperation {
 		StringBuilder streamCode = new StringBuilder();
 		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
-		streamCode.append(getLeftSource().getReturnVar() + ".stream().filter(");
+		streamCode.append(getLeftSource().getReturnVar() + ".get().filter(");
 		streamCode.append(getRightSource().getReturnVar() + "::contains)");
 		return streamCode.toString();
 	}
 
-	// TODO MJCG
+	/* (non-Javadoc)
+	 * @see edu.rit.dao.iapi.relational.RelationalAlgebra#toString()
+	 */
 	public String toString() {
 		return "";
 	}

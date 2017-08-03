@@ -1,6 +1,5 @@
 // Generated from Expr.g4 by ANTLR 4.3
 package edu.rit.dao.impl.parser;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -12,6 +11,19 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * of the available methods.
  */
 public class ExprBaseListener implements ExprListener {
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClause(@NotNull ExprParser.ClauseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClause(@NotNull ExprParser.ClauseContext ctx) { }
+
 	/**
 	 * {@inheritDoc}
 	 *

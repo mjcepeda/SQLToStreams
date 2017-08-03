@@ -7,24 +7,24 @@ import edu.rit.dao.iapi.relational.RelationalAlgebra;
 import edu.rit.dao.impl.store.access.Qualifier;
 
 /**
- * The Class Join.
+ * The Class Join. 
+ * This class has been replace for a cartesian product and a select
  */
 public class Join extends BinaryOperation {
-
+	
 	/**
 	 * The qualifiers. Contain the fields used for joining the tuples
 	 **/
 	private List<Qualifier> qualifiers;
 
+	
 	/**
 	 * Instantiates a new join.
 	 *
-	 * @param leftSource
-	 *            the left source
-	 * @param rightSource
-	 *            the right source
-	 * @param qualifiers
-	 *            the qualifiers
+	 * @param name the name
+	 * @param leftSource the left source
+	 * @param rightSource the right source
+	 * @param qualifiers the qualifiers
 	 */
 	public Join(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource, List<Qualifier> qualifiers) {
 		super(name, leftSource, rightSource);
@@ -38,9 +38,6 @@ public class Join extends BinaryOperation {
 	 */
 	public String perform() {
 		StringBuilder streamCode = new StringBuilder();
-		// TODO MJCG What happens if both maps have the same columns name, to I
-		// need to do the rename
-		// or I will get a rename operation from Derby?
 		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
 		streamCode.append(getLeftSource().getReturnVar()).append(".get().flatMap(bean1 ->");
@@ -58,6 +55,9 @@ public class Join extends BinaryOperation {
 		return streamCode.toString();
 	}
 
+	/* (non-Javadoc)
+	 * @see edu.rit.dao.iapi.relational.RelationalAlgebra#toString()
+	 */
 	public String toString() {
 		return "Join\nbeanName: " + getReturnVar() + "\n\tcolumns: " + qualifiers + "\nleftSource: " + getLeftSource()
 		+ "\nrightSource: " + getRightSource();

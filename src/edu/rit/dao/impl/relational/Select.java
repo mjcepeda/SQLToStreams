@@ -13,18 +13,27 @@ import edu.rit.dao.impl.store.access.Qualifier;
  */
 public class Select extends UnaryOperation {
 
-	private List<List<Qualifier>> predicate;
+	/** The qualifiers. */
+	private List<Qualifier> qualifiers;
+
+	/** The predicate. */
+	private String predicate;
 
 	/**
 	 * Instantiates a new select.
 	 *
 	 * @param name
 	 *            the name
-	 * @param attNames
-	 *            the att names
+	 * @param qualifiers
+	 *            the qualifiers
+	 * @param predicate
+	 *            the predicate
+	 * @param source
+	 *            the source
 	 */
-	public Select(String name, List<List<Qualifier>> predicate, RelationalAlgebra source) {
+	public Select(String name, List<Qualifier> qualifiers, String predicate, RelationalAlgebra source) {
 		super(name, source);
+		this.qualifiers = qualifiers;
 		this.predicate = predicate;
 	}
 
@@ -34,59 +43,63 @@ public class Select extends UnaryOperation {
 	 * @see edu.rit.dao.iapi.relational.UnaryOperation#perform()
 	 */
 	public String perform() {
-		// Use Predicate class??
-		// TODO Method in progress
 		StringBuilder streamCode = new StringBuilder();
 		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
-		streamCode.append(getSource().getReturnVar()).append(".get()");
+		streamCode.append(getSource().getReturnVar()).append(".get().filter(bean -> ");
 
-		// TODO MJCG Think about how to store the boolean expression and, or
-		// right now only support and expressions
-		for (List<Qualifier> l : predicate) {
-			streamCode.append(".filter(bean -> ");
-			for (Qualifier q : l) {
-				String attName = q.getColumnData().getAlias() != null ? q.getColumnData().getAlias(): q.getColumnData().getName(); 
-				// if it is not the first elements, include the and operator
-				if (!q.equals(l.stream().findFirst().get())) {
-					streamCode.append(" || ");
-				}
-				// TODO MJCG Include possible null in ParameterValue INDEX(0,-1)
-				StringBuilder predicate = new StringBuilder();
-				if (q.getParameterValue() != null) {
-					predicate.append("(bean.get(\"").append(attName).append("\") != null ? ");
-					predicate.append("((Comparable)bean.get(\"").append(attName).append("\")")
-							.append(").compareTo(");
-					if (q.getParameterValue() instanceof ColumnDescriptor) {
-						// comparing two attributes
-						predicate.append("bean.get(\"").append(((ColumnDescriptor) q.getParameterValue()).getName())
-								.append("\"))");
-					} else {
-						// comparing attribute against a value
-						predicate.append(q.getParameterValue()).append(")");
-					}
-					predicate.append(getOperatorForCompareTo(q.getOperator()));
-					predicate.append(" : false)");
+		int counter = 0;
+		for (Qualifier q : qualifiers) {
+
+			String attName = q.getColumnData().getAlias() != null ? q.getColumnData().getAlias()
+					: q.getColumnData().getName();
+			StringBuilder clause = new StringBuilder();
+			if (q.getParameterValue() != null) {
+				// ObjectUtils is safe null comparison
+				clause.append("org.apache.commons.lang3.ObjectUtils.compare((Comparable)bean.get(\"").append(attName)
+						.append("\"),");
+				if (q.getParameterValue() instanceof ColumnDescriptor) {
+					String value = ((ColumnDescriptor) q.getParameterValue()).getAlias() != null
+							? ((ColumnDescriptor) q.getParameterValue()).getAlias()
+							: ((ColumnDescriptor) q.getParameterValue()).getName();
+					// comparing two attributes
+					clause.append("(Comparable)bean.get(\"").append(value).append("\"))");
 				} else {
-					predicate.append("bean.get(\"").append(attName).append("\")").append(getOperator(q.getOperator())).append("null");
+					// comparing attribute against a value
+					clause.append("(Comparable)").append(q.getParameterValue()).append(")");
 				}
-				// checking negation expression
-				if (q.getNegateOperation() != null && q.getNegateOperation().equals(Boolean.TRUE)) {
-					streamCode.append("!(").append(predicate).append(")");
-				} else {
-					streamCode.append(predicate);
-				}
+				clause.append(getOperatorForCompareTo(q.getOperator()));
+			} else {
+				// comparing whether the attribute is null
+				clause.append("bean.get(\"").append(attName).append("\")").append(getOperator(q.getOperator()))
+						.append("null");
 			}
-			streamCode.append(")");
+
+			predicate = predicate.replace(String.valueOf(counter), clause.toString());
+			counter++;
 		}
-		
+		streamCode.append(predicate.toString());
+		streamCode.append(")");
+
 		return streamCode.toString();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.rit.dao.iapi.relational.RelationalAlgebra#toString()
+	 */
 	public String toString() {
-		return "Select\nbeanName: " + getReturnVar() + "\n\tcolumns: " + predicate + "\nsource: " + getSource();
+		return "Select\nbeanName: " + getReturnVar() + "\n\tcolumns: " + qualifiers + "\nsource: " + getSource();
 	}
 
+	/**
+	 * Gets the operator for compare to.
+	 *
+	 * @param operator
+	 *            the operator
+	 * @return the operator for compare to
+	 */
 	private String getOperatorForCompareTo(int operator) {
 		String operatorCode = null;
 		switch (operator) {
@@ -111,7 +124,14 @@ public class Select extends UnaryOperation {
 		}
 		return operatorCode;
 	}
-	
+
+	/**
+	 * Gets the operator.
+	 *
+	 * @param operator
+	 *            the operator
+	 * @return the operator
+	 */
 	private String getOperator(int operator) {
 		String operatorCode = null;
 		switch (operator) {
@@ -136,6 +156,5 @@ public class Select extends UnaryOperation {
 		}
 		return operatorCode;
 	}
-
 
 }

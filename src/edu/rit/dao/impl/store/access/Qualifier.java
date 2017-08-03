@@ -14,6 +14,7 @@ public class Qualifier {
 	/** The parameter value. */
 	private Object parameterValue;
 	
+	/** The negate operation. */
 	private Boolean negateOperation;
 
 	/**
@@ -71,6 +72,8 @@ public class Qualifier {
 	}
 
 	/**
+	 * Gets the negate operation.
+	 *
 	 * @return the negateOperation
 	 */
 	public Boolean getNegateOperation() {
@@ -78,12 +81,17 @@ public class Qualifier {
 	}
 
 	/**
+	 * Sets the negate operation.
+	 *
 	 * @param negateOperation the negateOperation to set
 	 */
 	public void setNegateOperation(Boolean negateOperation) {
 		this.negateOperation = negateOperation;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString() {		
 		return columnData.getName() + Operator.getOperator(operator) + parameterValue;
 	}

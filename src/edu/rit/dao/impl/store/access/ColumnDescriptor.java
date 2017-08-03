@@ -14,12 +14,20 @@ public class ColumnDescriptor {
 	/** The table name. */
 	private String tableName;
 	
-	//TODO MJCG Add alias field
+	/** The alias. */
 	private String alias;
 	
-	/** The type. */
+	/**
+	 *  The type.
+	 *
+	 * @return the string
+	 */
 	//private DataType type;
 	
+	
+	public String toString() {
+		return "name: " + name + ", alias: " + alias;
+	}
 	/**
 	 * Gets the id.
 	 *
@@ -73,12 +81,10 @@ public class ColumnDescriptor {
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
 	}
-	
-	public String toString() {
-		return name;
-	}
 
 	/**
+	 * Gets the alias.
+	 *
 	 * @return the alias
 	 */
 	public String getAlias() {
@@ -86,6 +92,8 @@ public class ColumnDescriptor {
 	}
 
 	/**
+	 * Sets the alias.
+	 *
 	 * @param alias the alias to set
 	 */
 	public void setAlias(String alias) {

@@ -4,12 +4,22 @@ import java.util.Map;
 
 import edu.rit.dao.impl.store.access.ColumnDescriptor;
 
+/**
+ * The Class RelationalAlgebra.
+ */
 public abstract class RelationalAlgebra {
 
+	/** The return var. */
 	private String returnVar;
 	
+	/** The att order. */
 	private Map<Integer, ColumnDescriptor> attOrder;
 	
+	/**
+	 * Instantiates a new relational algebra.
+	 *
+	 * @param returnVar the return var
+	 */
 	public RelationalAlgebra(String returnVar) {
 		this.returnVar = returnVar;
 	}
@@ -21,9 +31,14 @@ public abstract class RelationalAlgebra {
 	 */
 	public abstract String perform();
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public abstract String toString();
 
 	/**
+	 * Gets the return var.
+	 *
 	 * @return the returnVar
 	 */
 	public String getReturnVar() {
@@ -31,6 +46,8 @@ public abstract class RelationalAlgebra {
 	}
 
 	/**
+	 * Gets the att order.
+	 *
 	 * @return the attOrder
 	 */
 	public Map<Integer, ColumnDescriptor> getAttOrder() {
@@ -38,6 +55,8 @@ public abstract class RelationalAlgebra {
 	}
 
 	/**
+	 * Sets the att order.
+	 *
 	 * @param attOrder the attOrder to set
 	 */
 	public void setAttOrder(Map<Integer, ColumnDescriptor> attOrder) {

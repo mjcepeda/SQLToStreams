@@ -1,5 +1,6 @@
 package edu.rit.dao.impl.store.access;
 
+
 /**
  * The Class Operator.
  */
@@ -9,55 +10,71 @@ public class Operator {
 	// compare operations
 	public static final int EQUALS = 0;
 
+	/** The Constant EQUALS_CHAR. */
 	public static final String EQUALS_CHAR = "=";
 
 	/** The Constant GRE. */
 	public static final int GRE = 1;
 
+	/** The Constant GRE_CHAR. */
 	public static final String GRE_CHAR = ">";
 
 	/** The Constant GREQ. */
 	public static final int GREQ = 2;
 
+	/** The Constant GREQ_CHAR. */
 	public static final String GREQ_CHAR = "=>";
 
 	/** The Constant LESS. */
 	public static final int LESS = 3;
 
+	/** The Constant LESS_CHAR. */
 	public static final String LESS_CHAR = "<";
 
 	/** The Constant LEQ. */
 	public static final int LEQ = 4;
 
+	/** The Constant LEQ_CHAR. */
 	public static final String LEQ_CHAR = "<=";
 
 	/** The Constant DISTINCT. */
 	public static final int DISTINCT = 5;
 
+	/** The Constant DISTINCT_CHAR. */
 	public static final String DISTINCT_CHAR = "<>";
 
 	/** The Constant MINUS. */
 	// arithmetic operators
 	public static final int MINUS = 6;
 
+	/** The Constant MINUS_CHAR. */
 	public static final String MINUS_CHAR = "-";
 
 	/** The Constant PLUS. */
 	public static final int PLUS = 7;
 
+	/** The Constant PLUS_CHAR. */
 	public static final String PLUS_CHAR = "+";
 
 	/** The Constant DIVIDE. */
 	public static final int DIVIDE = 8;
 
+	/** The Constant DIVIDE_CHAR. */
 	public static final String DIVIDE_CHAR = "/";
 
 	/** The Constant SUM. */
 	public static final int MULTIPLY = 9;
 
+	/** The Constant MULTIPLY_CHAR. */
 	public static final String MULTIPLY_CHAR = "*";
 
 	
+	/**
+	 * Gets the operator.
+	 *
+	 * @param operator the operator
+	 * @return the operator
+	 */
 	public static String getOperator(int operator) {
 		String op = null;
 		switch (operator) {
@@ -97,6 +114,12 @@ public class Operator {
 	}
 
 	
+	/**
+	 * Gets the operator.
+	 *
+	 * @param operator the operator
+	 * @return the operator
+	 */
 	public static int getOperator(String operator) {
 		int op = EQUALS;
 		switch (operator) {

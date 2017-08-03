@@ -96,13 +96,15 @@ public class Utils {
 					.filter(pd -> Objects.nonNull(pd.getReadMethod())).forEach(pd -> {
 						try {
 							Object value = pd.getReadMethod().invoke(bean);
-							String typeVar = "varchar(10)";
+							String typeVar = "varchar(100)";
 							//TODO MJCG Include date type?
 							//TODO MJCG Error when data type is BigDecimal
 							//TODO MJCG All numeric data cannot be defined as int, they must float or double
 							if (Number.class.isInstance(value)) {
-								typeVar = "int";
+								typeVar = "numeric";
 							}
+//							value instanceof java.math.BigDecimal
+//							typeVar = "numeric";
 							map.put(pd.getName(), typeVar);
 						} catch (Exception e) {
 							e.printStackTrace();

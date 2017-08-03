@@ -1,25 +1,15 @@
 package edu.rit.dao.impl;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.EmbedPreparedStatement;
-import org.apache.derby.impl.jdbc.EmbedResultSet42;
-
-import edu.rit.dao.iapi.Database;
-import edu.rit.dao.iapi.relational.RelationalAlgebra;
 
 /**
  * The Class DerbyDBImpl.
@@ -39,6 +29,9 @@ public class DerbyDBImpl {
 	 * @see edu.rit.dao.Database#createDB()
 	 */
 	
+	/**
+	 * Creates the DB.
+	 */
 	public void createDB() {
 		try {
 			System.setProperty("derby.language.logQueryPlan", "true");
@@ -54,6 +47,9 @@ public class DerbyDBImpl {
 	 * @see edu.rit.dao.Database#dropDB()
 	 */
 	
+	/**
+	 * Drop DB.
+	 */
 	public void dropDB() {
 		try {
 			Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
@@ -63,7 +59,7 @@ public class DerbyDBImpl {
 
 			if (((se.getErrorCode() == 45000) && ("08006".equals(se.getSQLState())))) {
 				// we got the expected exception
-				System.out.println("Database drop normally");
+				//System.out.println("Database drop normally");
 				// Note that for single database shutdown, the expected
 				// SQL state is "08006", and the error code is 45000.
 			} else {
@@ -80,11 +76,14 @@ public class DerbyDBImpl {
 			e.printStackTrace();
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see edu.rit.dao.Database#createTable(java.lang.String, java.util.Map)
-	 */
 	
+	/**
+	 * Creates the table.
+	 *
+	 * @param tableName the table name
+	 * @param columnsDescMap the columns desc map
+	 * @return true, if successful
+	 */
 	public boolean createTable(String tableName, Map<String, String> columnsDescMap) {
 		boolean isCreated = Boolean.FALSE;
 		//TableDescriptor tableDescriptor = null;
@@ -106,27 +105,27 @@ public class DerbyDBImpl {
 			preparedStatement.executeUpdate();
 			
 			//extract columns description and table name
-			EmbedPreparedStatement stmt42 = (EmbedPreparedStatement)preparedStatement;
-			if ( stmt42 != null) {
-				Field field = stmt42.getClass().getSuperclass().getDeclaredField("activation");
-				field.setAccessible(true);
-				Activation holder =(Activation) field.get(stmt42);
-				TableDescriptor td = holder.getDDLTableDescriptor();
-				td.getColumnDescriptorList().forEach(System.out::println);
-			}
+//			EmbedPreparedStatement stmt42 = (EmbedPreparedStatement)preparedStatement;
+//			if ( stmt42 != null) {
+//				Field field = stmt42.getClass().getSuperclass().getDeclaredField("activation");
+//				field.setAccessible(true);
+//				Activation holder =(Activation) field.get(stmt42);
+//				TableDescriptor td = holder.getDDLTableDescriptor();
+//				td.getColumnDescriptorList().forEach(System.out::println);
+//			}
 			
 		} catch (SQLException e) {
 			System.err.println("Error creating table");
 			printSQLException(e);
-		} catch (NoSuchFieldException e) {
+		}/* catch (NoSuchFieldException e) {
 			e.printStackTrace();
-		} catch (SecurityException e) {
+		} */catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
-		} catch (IllegalAccessException e) {
+		} /*catch (IllegalAccessException e) {
 			e.printStackTrace();
-		} finally {
+		} */finally {
 			// release all open resources to avoid unnecessary memory usage
 			try {
 				if (preparedStatement!= null) {
@@ -140,10 +139,13 @@ public class DerbyDBImpl {
 		return isCreated;
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.rit.dao.Database#insertData(java.lang.String, java.util.List)
+	/**
+	 * Insert data.
+	 *
+	 * @param tableName the table name
+	 * @param dataList the data list
+	 * @return the int[]
 	 */
-	
 	public int[] insertData(String tableName, final List<Map<String, Object>> dataList) {
 		int affectedRows[] = null;
 		StringBuilder sql = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
@@ -194,10 +196,9 @@ public class DerbyDBImpl {
 		return affectedRows;
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.rit.dao.Database#shutdown()
+	/**
+	 * Shutdown.
 	 */
-	
 	public void shutdown() {
 		try {
 			// the shutdown=true attribute shuts down Derby
@@ -211,7 +212,7 @@ public class DerbyDBImpl {
 		} catch (SQLException se) {
 			if (((se.getErrorCode() == 50000) && ("XJ015".equals(se.getSQLState())))) {
 				// we got the expected exception
-				System.out.println("Derby shut down normally");
+				//System.out.println("Derby shut down normally");
 				// Note that for single database shutdown, the expected
 				// SQL state is "08006", and the error code is 45000.
 			} else {
@@ -245,28 +246,32 @@ public class DerbyDBImpl {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see edu.rit.dao.Database#getExecutionPlan(java.lang.String)
+	/**
+	 * Execute query.
+	 *
+	 * @param query the query
+	 * @return the result set
 	 */
-	public RelationalAlgebra getExecutionPlan(String query) {
+	public ResultSet executeQuery(String query) {
 		PreparedStatement preparedStatement = null;
-		RelationalAlgebra executionPlan=null;
+//		RelationalAlgebra executionPlan=null;
+		ResultSet rs= null;
 		try {
 			if (!(conn instanceof EmbedConnection))
 				return null;
 			
-			EmbedConnection econn = (EmbedConnection) conn;
+			//EmbedConnection econn = (EmbedConnection) conn;
 			//econn.getLanguageConnection().setRunTimeStatisticsMode(Boolean.TRUE);
 			preparedStatement = conn.prepareStatement(query);
-			ParameterMetaData pmd = preparedStatement.getParameterMetaData();
-			ResultSet rs = preparedStatement.executeQuery();
+			//ParameterMetaData pmd = preparedStatement.getParameterMetaData();
+			rs = preparedStatement.executeQuery();
 			
-			EmbedResultSet42 newRS = (EmbedResultSet42) rs;
-			
-			ResultSetMetaData md = rs.getMetaData();
-			
-			rs.close();
-			
+//			EmbedResultSet42 newRS = (EmbedResultSet42) rs;
+//			
+//			ResultSetMetaData md = rs.getMetaData();
+//			
+//			rs.close();
+//			
 //			RunTimeStatisticsImpl rts = (RunTimeStatisticsImpl)econn.getLanguageConnection().getRunTimeStatisticsObject();
 //			Field field = rts.getClass().getDeclaredField("topResultSetStatistics");
 //			field.setAccessible(true);
@@ -290,16 +295,17 @@ public class DerbyDBImpl {
 			e.printStackTrace();
 		}*/ finally {
 			// release all open resources to avoid unnecessary memory usage
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-					preparedStatement = null;
-				}
-			} catch (SQLException sqle) {
-				printSQLException(sqle);
-			}
+//			try {
+//				if (preparedStatement != null) {
+//					preparedStatement.close();
+//					preparedStatement = null;
+//				}
+//			} catch (SQLException sqle) {
+//				printSQLException(sqle);
+//			}
 		}
 
-		return executionPlan;
+		return rs;
 	}
+	
 }

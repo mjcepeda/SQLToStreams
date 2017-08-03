@@ -11,10 +11,9 @@ public class Union extends BinaryOperation {
 	/**
 	 * Instantiates a new union.
 	 *
-	 * @param leftSource
-	 *            the left source
-	 * @param rightSource
-	 *            the right source
+	 * @param name the name
+	 * @param leftSource the left source
+	 * @param rightSource the right source
 	 */
 	public Union(String name, RelationalAlgebra leftSource, RelationalAlgebra rightSource) {
 		super(name, leftSource, rightSource);
@@ -29,12 +28,15 @@ public class Union extends BinaryOperation {
 		StringBuilder streamCode = new StringBuilder();
 		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
-		streamCode.append("Stream.concat(");
-		streamCode.append(getLeftSource().getReturnVar() + ".stream(), ");
-		streamCode.append(getRightSource().getReturnVar() + ".stream())");
+		streamCode.append("java.util.stream.Stream.concat(");
+		streamCode.append(getLeftSource().getReturnVar() + ".get(), ");
+		streamCode.append(getRightSource().getReturnVar() + ".get())");
 		return streamCode.toString();
 	}
 
+	/* (non-Javadoc)
+	 * @see edu.rit.dao.iapi.relational.RelationalAlgebra#toString()
+	 */
 	public String toString() {
 		return "Union\nbeanName: " + getReturnVar() + "\nleftSource: " + getLeftSource()
 				+ "\nrightSource: " + getRightSource();

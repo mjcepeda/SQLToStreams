@@ -28,7 +28,6 @@ import edu.rit.dao.impl.parser.ExprParser;
 import edu.rit.dao.impl.parser.PredicateListener;
 import edu.rit.dao.impl.relational.CartesianProduct;
 import edu.rit.dao.impl.relational.Difference;
-import edu.rit.dao.impl.relational.Join;
 import edu.rit.dao.impl.relational.Projection;
 import edu.rit.dao.impl.relational.Select;
 import edu.rit.dao.impl.relational.TableAccess;
@@ -38,8 +37,11 @@ import edu.rit.dao.impl.store.access.Operator;
 import edu.rit.dao.impl.store.access.Qualifier;
 import edu.rit.utils.Utils;
 import ra.OneArgTerm;
+import ra.Result;
 import ra.Term;
 import ra.TwoArgTerm;
+import ra.operators.ReferenceT;
+import ra.operators.RelationT;
 
 public class DatabaseImpl implements Database {
 
@@ -54,6 +56,7 @@ public class DatabaseImpl implements Database {
 	public static final String UNION = "union";
 	public static final String DIFF = "diffset";
 	public static final String CARTPROD = "cartprod";
+	public static final String REFERENCE = "reference";
 
 	// index for every column
 	private Map<Integer, String> attributesOrder;
@@ -76,7 +79,8 @@ public class DatabaseImpl implements Database {
 			System.out.println(Terms.indent(t));
 
 			if (t != null) {
-				// getting the map with the information about columns name from the schema
+				// getting the map with the information about columns name from
+				// the schema
 				Field fieldColumns = Utils.getField(schema.getClass(), "columnNames");
 				schemaColumnNames = (TreeMap) fieldColumns.get(schema);
 				root = parse(schema, t);
@@ -96,10 +100,19 @@ public class DatabaseImpl implements Database {
 		RelationalAlgebra raSource = null;
 		BinaryOperation bo = null;
 		Map<Integer, ColumnDescriptor> attsOrder = null;
+		PredicateListener listener = null;
 		int order = 1;
 		// get relational algebra operation type
 		String type = term.getClass().getAnnotation(com.thoughtworks.xstream.annotations.XStreamAlias.class).value();
 		switch (type.toLowerCase()) {
+		// check how it works
+		case REFERENCE:
+			Field refer = Utils.getField(term.getClass(), "refersTo");
+			try {
+				term.alias = String.valueOf(refer.get(term));
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
 		case RELATION:
 			String tableName = term.alias;
 			ra = new TableAccess(Utils.randomIdentifier(tableName), null, tableName);
@@ -117,9 +130,6 @@ public class DatabaseImpl implements Database {
 			ra.setAttOrder(attsOrder);
 			break;
 		case PROJECTION:
-			// TODO try this query: select * from professor p inner join
-			// department d
-			// on p.dept = d.id
 			Field field = Utils.getField(term.getClass(), "indexesToProjectOn");
 			List<String> attNames = null;
 			try {
@@ -130,7 +140,10 @@ public class DatabaseImpl implements Database {
 				if (projectedColumns.length > 0) {
 					attNames = new ArrayList<>();
 					for (int index : projectedColumns) {
-						attNames.add(raSource.getAttOrder().get(index).getName());
+						// using alias
+						ColumnDescriptor c = raSource.getAttOrder().get(index);
+						String name = c.getAlias() != null ? c.getAlias() : c.getName();
+						attNames.add(name);
 						attsOrder.put(order, raSource.getAttOrder().get(index));
 						order++;
 					}
@@ -168,15 +181,16 @@ public class DatabaseImpl implements Database {
 			Field fieldIndex2 = Utils.getField(term.getClass(), "index2");
 			ColumnDescriptor column = new ColumnDescriptor();
 			try {
-				// creating the qualifier with the join
+				// creating the predicate with the matching fields
 				int indexColunmLeft = (int) fieldIndex1.get(term);
 				int indexColunmRight = (int) fieldIndex2.get(term);
 				column = bo.getLeftSource().getAttOrder().get(indexColunmLeft);
-				qualifier.setParameterValue(bo.getRightSource().getAttOrder().get(indexColunmRight).getName());
+				qualifier.setParameterValue(bo.getRightSource().getAttOrder().get(indexColunmRight));
 				qualifier.setColumnData(column);
 				qualifier.setOperator(Operator.EQUALS);
 				List<Qualifier> qualifiers = new ArrayList<>();
 				qualifiers.add(qualifier);
+
 				// updating attributes order
 				List<ColumnDescriptor> list = new ArrayList<>();
 				list.add(bo.getLeftSource().getAttOrder().get(indexColunmLeft));
@@ -198,8 +212,18 @@ public class DatabaseImpl implements Database {
 					attsOrder.put(order, s);
 					order++;
 				}
-				ra = new Join(Utils.randomIdentifier(EQJOIN), bo.getLeftSource(), bo.getRightSource(), qualifiers);
-				ra.setAttOrder(attsOrder);
+				// ra = new Join(Utils.randomIdentifier(EQJOIN),
+				// bo.getLeftSource(), bo.getRightSource(), qualifiers);
+				// ra.setAttOrder(attsOrder);
+				// join operation is a cartesian product and a select
+				raSource = new CartesianProduct(Utils.randomIdentifier(CARTPROD), bo.getLeftSource(),
+						bo.getRightSource());
+				raSource.setAttOrder(attsOrder);
+				// in this case the predicate only contains the join clause that
+				// it is an expression like this #3=#5, we replace that
+				// expression for 0
+				ra = new Select(Utils.randomIdentifier(SELECT), qualifiers, "0", raSource);
+				ra.setAttOrder(raSource.getAttOrder());
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
@@ -211,16 +235,20 @@ public class DatabaseImpl implements Database {
 			checkingDuplicateAttNames(bo);
 			raSource = new CartesianProduct(Utils.randomIdentifier(CARTPROD), bo.getLeftSource(), bo.getRightSource());
 			raSource.setAttOrder(bo.getAttOrder());
-			ra = new Select(Utils.randomIdentifier(SELECT), parsePredicate(term, raSource.getAttOrder()), raSource);
+			listener = parsePredicate(term, raSource.getAttOrder());
+			ra = new Select(Utils.randomIdentifier(SELECT), listener.getQualifiers(),
+					listener.getPredicate().toString(), raSource);
 			ra.setAttOrder(raSource.getAttOrder());
 			break;
 		case FILTER:
 			raSource = parseOperation(schema, getSource(term));
-			List<List<Qualifier>> qualifiers = parsePredicate(term, raSource.getAttOrder());
-			ra = new Select(Utils.randomIdentifier(SELECT), qualifiers, raSource);
+			listener = parsePredicate(term, raSource.getAttOrder());
+			ra = new Select(Utils.randomIdentifier(SELECT), listener.getQualifiers(),
+					listener.getPredicate().toString(), raSource);
 			ra.setAttOrder(raSource.getAttOrder());
 			break;
 		default:
+			System.err.println("No implemented parser for " + type );
 			break;
 		}
 		return ra;
@@ -229,41 +257,36 @@ public class DatabaseImpl implements Database {
 	private BinaryOperation binaryOperation(Schema schema, Term term) {
 		BinaryOperation bo = null;
 		// two sources, left and right
-		// TODO MJCG Check if superClass is TwoArgTerm
-		TwoArgTerm twoTerms = (TwoArgTerm) term;
-		RelationalAlgebra leftSource = parseOperation(schema, twoTerms.getInputTerm1());
-		RelationalAlgebra rightSource = parseOperation(schema, twoTerms.getInputTerm2());
-		bo = new BinaryOperation(null, leftSource, rightSource) {
+		if (TwoArgTerm.class.isAssignableFrom(term.getClass())) {
+			TwoArgTerm twoTerms = (TwoArgTerm) term;
+			RelationalAlgebra leftSource = parseOperation(schema, twoTerms.getInputTerm1());
+			RelationalAlgebra rightSource = parseOperation(schema, twoTerms.getInputTerm2());
+			bo = new BinaryOperation(null, leftSource, rightSource) {
 
-			@Override
-			public String toString() {
-				return null;
-			}
+				@Override
+				public String toString() {
+					return null;
+				}
 
-			@Override
-			public String perform() {
-				return null;
-			}
-		};
-		// updating attributes order
-		int index = 1;
-		Map<Integer, ColumnDescriptor> attsOrder = new HashMap<>();
-		for (ColumnDescriptor c : leftSource.getAttOrder().values()) {
-			attsOrder.put(index, c);
-			index++;
+				@Override
+				public String perform() {
+					return null;
+				}
+			};
+			// updating map of attributes order
+			updateAttsOrder(bo);
 		}
-		for (ColumnDescriptor c : rightSource.getAttOrder().values()) {
-			attsOrder.put(index, c);
-			index++;
-		}
-		bo.setAttOrder(attsOrder);
 		return bo;
 	}
 
 	private Term getSource(Term term) {
-		// TODO MJCG Check if superClass is OneArgTerm
-		OneArgTerm oneAgr = (OneArgTerm) term;
-		return oneAgr.getInputTerm();
+		Term t = null;
+		// Check whether superClass is OneArgTerm
+		if (OneArgTerm.class.isAssignableFrom(term.getClass())) {
+			OneArgTerm oneAgr = (OneArgTerm) term;
+			t = oneAgr.getInputTerm();
+		}
+		return t;
 	}
 
 	private String createTableStatement(String tableName, Map<String, String> columnsDescMap) {
@@ -280,7 +303,7 @@ public class DatabaseImpl implements Database {
 		return sql.toString();
 	}
 
-	private List<List<Qualifier>> parsePredicate(Term term, Map<Integer, ColumnDescriptor> attsOrder) {
+	private PredicateListener parsePredicate(Term term, Map<Integer, ColumnDescriptor> attsOrder) {
 		// creating the listener
 		PredicateListener listener = new PredicateListener(attsOrder);
 		// getting the predicate value from the term object
@@ -301,27 +324,43 @@ public class DatabaseImpl implements Database {
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
-		return listener.getPredicate();
+		return listener;
 	}
 
-	private void checkingDuplicateAttNames (BinaryOperation bo) {
-		//checking whether there are duplicates attributes name
+	private void checkingDuplicateAttNames(BinaryOperation bo) {
+		// checking whether there are duplicates attributes name
 		Map<String, Integer> mapLeftSource = new HashMap<>();
-		bo.getLeftSource().getAttOrder().forEach((k,v) -> mapLeftSource.put(v.getName(), k));
+		bo.getLeftSource().getAttOrder().forEach((k, v) -> mapLeftSource.put(v.getName(), k));
 		Map<String, Integer> mapRightSource = new HashMap<>();
-		bo.getRightSource().getAttOrder().forEach((k,v) -> mapRightSource.put(v.getName(), k));
-		Collection<String> intersection = CollectionUtils.intersection(mapLeftSource.keySet(),
-				mapRightSource.keySet());
-		for (String attName: intersection) {
-			//renaming duplicates adding as a prefix the table name
+		bo.getRightSource().getAttOrder().forEach((k, v) -> mapRightSource.put(v.getName(), k));
+		Collection<String> intersection = CollectionUtils.intersection(mapLeftSource.keySet(), mapRightSource.keySet());
+		for (String attName : intersection) {
+			// renaming duplicates adding as a prefix the table name
 			renamingAttribute(attName, mapLeftSource, bo.getLeftSource().getAttOrder());
 			renamingAttribute(attName, mapRightSource, bo.getRightSource().getAttOrder());
 		}
+		// updateAttsOrder(bo);
 	}
-	
-	private void renamingAttribute(String attName, Map<String, Integer> tmpMap, Map<Integer, ColumnDescriptor> attsMap) {
+
+	private void renamingAttribute(String attName, Map<String, Integer> tmpMap,
+			Map<Integer, ColumnDescriptor> attsMap) {
 		Integer id = tmpMap.get(attName);
 		ColumnDescriptor c = attsMap.get(id);
-		c.setAlias(c.getTableName() + "." + c.getName());
+		c.setAlias(c.getTableName() + "_" + c.getName());
+	}
+
+	private void updateAttsOrder(BinaryOperation bo) {
+		// updating attributes order of both sources
+		int index = 1;
+		Map<Integer, ColumnDescriptor> attsOrder = new HashMap<>();
+		for (ColumnDescriptor c : bo.getLeftSource().getAttOrder().values()) {
+			attsOrder.put(index, c);
+			index++;
+		}
+		for (ColumnDescriptor c : bo.getRightSource().getAttOrder().values()) {
+			attsOrder.put(index, c);
+			index++;
+		}
+		bo.setAttOrder(attsOrder);
 	}
 }

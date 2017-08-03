@@ -2,17 +2,26 @@ package edu.rit.dao.impl.store.access;
 
 import java.util.List;
 
+/**
+ * The Class MethodDescriptor.
+ */
 public class MethodDescriptor {
 	
+	/** The method name. */
 	String methodName;
 	
+	/** The input params. */
 	List<String> inputParams;
 	
+	/** The output param. */
 	String outputParam;
 	
+	/** The query. */
 	String query;
 
 	/**
+	 * Gets the method name.
+	 *
 	 * @return the methodName
 	 */
 	public String getMethodName() {
@@ -20,6 +29,8 @@ public class MethodDescriptor {
 	}
 
 	/**
+	 * Sets the method name.
+	 *
 	 * @param methodName the methodName to set
 	 */
 	public void setMethodName(String methodName) {
@@ -27,6 +38,8 @@ public class MethodDescriptor {
 	}
 
 	/**
+	 * Gets the input params.
+	 *
 	 * @return the inputParams
 	 */
 	public List<String> getInputParams() {
@@ -34,6 +47,8 @@ public class MethodDescriptor {
 	}
 
 	/**
+	 * Sets the input params.
+	 *
 	 * @param inputParams the inputParams to set
 	 */
 	public void setInputParams(List<String> inputParams) {
@@ -41,6 +56,8 @@ public class MethodDescriptor {
 	}
 
 	/**
+	 * Gets the output param.
+	 *
 	 * @return the outputParam
 	 */
 	public String getOutputParam() {
@@ -48,6 +65,8 @@ public class MethodDescriptor {
 	}
 
 	/**
+	 * Sets the output param.
+	 *
 	 * @param outputParam the outputParam to set
 	 */
 	public void setOutputParam(String outputParam) {
@@ -55,6 +74,8 @@ public class MethodDescriptor {
 	}
 
 	/**
+	 * Gets the query.
+	 *
 	 * @return the query
 	 */
 	public String getQuery() {
@@ -62,6 +83,8 @@ public class MethodDescriptor {
 	}
 
 	/**
+	 * Sets the query.
+	 *
 	 * @param query the query to set
 	 */
 	public void setQuery(String query) {

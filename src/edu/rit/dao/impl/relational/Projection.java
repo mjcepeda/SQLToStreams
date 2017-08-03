@@ -13,13 +13,13 @@ public class Projection extends UnaryOperation {
 	/** The att names. */
 	private List<String> attNames;
 
+	
 	/**
 	 * Instantiates a new projection.
 	 *
-	 * @param name
-	 *            the name
-	 * @param attNames
-	 *            the att names
+	 * @param name the name
+	 * @param attNames the att names
+	 * @param source the source
 	 */
 	public Projection(String name, List<String> attNames, RelationalAlgebra source) {
 		super(name, source);
@@ -32,7 +32,6 @@ public class Projection extends UnaryOperation {
 	 * @return the string
 	 */
 	public String perform() {
-		// TODO MJCG Limitations: name || id
 		StringBuilder streamCode = new StringBuilder();
 		streamCode.append("java.util.function.Supplier<java.util.stream.Stream<Map<String, Object>>> ");
 		streamCode.append(getReturnVar()).append(" = () ->");
@@ -52,12 +51,17 @@ public class Projection extends UnaryOperation {
 		return streamCode.toString();
 	}
 
+	/* (non-Javadoc)
+	 * @see edu.rit.dao.iapi.relational.RelationalAlgebra#toString()
+	 */
 	public String toString() {
 		return "Projection\n\tbeanName: " + getReturnVar() + "\n\tcolumns: " + attNames
 				+ "\n\tsource: " + getSource();
 	}
 
 	/**
+	 * Gets the att names.
+	 *
 	 * @return the attNames
 	 */
 	public List<String> getAttNames() {
@@ -65,8 +69,9 @@ public class Projection extends UnaryOperation {
 	}
 
 	/**
-	 * @param attNames
-	 *            the attNames to set
+	 * Sets the att names.
+	 *
+	 * @param attNames            the attNames to set
 	 */
 	public void setAttNames(List<String> attNames) {
 		this.attNames = attNames;

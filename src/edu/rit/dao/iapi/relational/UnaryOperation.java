@@ -4,9 +4,6 @@ package edu.rit.dao.iapi.relational;
  * The Class RelationAlgebraOperation.
  */
 public abstract class UnaryOperation extends RelationalAlgebra{
-
-	/** The table name. */
-	//private String beanName;
 	
 	/** The source. */
 	private RelationalAlgebra source;
