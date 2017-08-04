@@ -172,6 +172,7 @@ public class Utils {
 	        for(int i = 0; i < length; i++) {
 	            builder.append(lexicon.charAt(rand.nextInt(lexicon.length())));
 	        }
+	        //if the identifier already exists, generate another one
 	        if(identifiers.contains(builder.toString())) {
 	            builder = new StringBuilder();
 	        }

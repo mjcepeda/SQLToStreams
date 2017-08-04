@@ -31,7 +31,7 @@ public class DataSet {
 		fillProfessors();
 		fillDepartments();
 		fillSections();
-		//fillCourses();
+		fillCourses();
 	}
 	
 	/**
@@ -69,10 +69,10 @@ public class DataSet {
 		sections.add(new Section("CS-319", "Spring", 2010, "1"));
 	}
 
-//	private void fillCourses() {
-//		courses.add(new Course(1, "620", 1));
-//		courses.add(new Course(2, "630", 1));
-//	}
+	private void fillCourses() {
+		courses.add(new Course(1, "620", "CSCI", 3));
+		courses.add(new Course(2, "630", "CSCI", 3));
+	}
 	/**
  * Gets the professors.
  *

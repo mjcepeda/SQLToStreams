@@ -138,13 +138,26 @@ public class Translator {
 		List<String> paramsTypes = new ArrayList<>();
 		for (MethodDescriptor m : classDefinition.getMethods()) {
 			m.getInputParams().forEach(i -> {
-				if (!paramsTypes.contains(i)) {
+				if (!paramsTypes.contains(i.trim())) {
 					paramsTypes.add(i.trim());
 				}
 			});
 		}
+		// creating a method that converst user DTO to Map<String, Object>
 		paramsTypes.forEach(p -> {
 			methodsSpec.add(generator.userDTOtoMap(p));
+		});
+		// creating list with all different input DTOs for this class
+		List<String> returnTypes = new ArrayList<>();
+		classDefinition.getMethods().forEach(m -> {
+			if (!returnTypes.contains(m.getOutputParam().trim())) {
+				returnTypes.add(m.getOutputParam().trim());
+			}
+		});
+
+		// creating a method that converst map to user DTO
+		returnTypes.forEach(p -> {
+			methodsSpec.add(generator.mapToUserDTO(p));
 		});
 		// extracting the package
 		int i = classDefinition.getAbsoluteName().lastIndexOf(".");
@@ -231,10 +244,16 @@ public class Translator {
 		Collections.reverse(stmts);
 		// adding as a final statement the conversion from temporary maps to
 		// return type specified into the file
-		String returnStmt = "return " + plan.getReturnVar() + ".get().map(map -> {" + returnType + " bean = new "
-				+ returnType + "(); try { org.apache.commons.beanutils.BeanUtils.copyProperties(bean, map); } "
-				+ "catch (IllegalAccessException | java.lang.reflect.InvocationTargetException e) { e.printStackTrace(); return null; } return bean; })"
-				+ ".collect(java.util.stream.Collectors.toList())";
+		// extracting the package
+		int i = returnType.lastIndexOf(".");
+		String pck = returnType.substring(0, i > -1 ? i : 0);
+		String simpleName = returnType.substring(returnType.lastIndexOf(".") + 1).toLowerCase();
+		String returnStmt = "return mapTo" + simpleName + "(" +  plan.getReturnVar() + ".get())";
+//		String returnStmt = "return " + plan.getReturnVar() + ".get().map(map -> {" + returnType + " bean = new "
+//				+ returnType + "(); try { org.apache.commons.beanutils.BeanUtils.copyProperties(bean, map); } "
+//				+ "catch (IllegalAccessException | java.lang.reflect.InvocationTargetException e) { e.printStackTrace(); return null; } return bean; })"
+//				+ ".collect(java.util.stream.Collectors.toList())";
+
 		stmts.add(returnStmt);
 		return stmts;
 	}

@@ -1,0 +1,22 @@
+class=edu.rit.test.UniversityStreams
+
+method=testJoin
+params=edu.rit.test.data.Professor, edu.rit.test.data.Department
+returnType=edu.rit.test.data.Professor
+query=select p.name, p.lastName from professor p inner join department d on d.id = p.dept and deptName='Computer Science'
+
+method=testSelect
+params=edu.rit.test.data.Professor
+returnType=edu.rit.test.data.Professor
+query=select * from professor where salary > 95000
+
+method=testUnion
+params=edu.rit.test.data.Professor
+returnType=edu.rit.test.data.Professor
+query=select * from professor p where dept= 1 union select * from professor p1 where dept=2
+
+method=testDifference
+params=edu.rit.test.data.Section
+returnType=edu.rit.test.data.Section
+query=select courseId from section where semester='Fall' and year=2009 except select courseId from section where semester='Spring' and year = 2010
+

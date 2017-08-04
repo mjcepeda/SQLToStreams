@@ -23,6 +23,21 @@ public class Course {
 	public Course(){}
 	
 	/**
+	 * Instantiates a new course.
+	 *
+	 * @param id the id
+	 * @param title the title
+	 * @param dept_name the dept name
+	 * @param credits the credits
+	 */
+	public Course(int id, String title, String dept_name, int credits) {
+		this.id = id;
+		this.title=title;
+		this.dept_name= dept_name;
+		this.credits=credits;
+	}
+	
+	/**
 	 * Gets the id.
 	 *
 	 * @return the id

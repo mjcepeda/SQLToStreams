@@ -91,11 +91,11 @@ public class DatabaseImpl implements Database {
 		return root;
 	}
 
-	private RelationalAlgebra parse(Schema schema, Term term) {
+	private RelationalAlgebra parse(Schema schema, Term term) throws Exception {
 		return parseOperation(schema, term);
 	}
 
-	private RelationalAlgebra parseOperation(Schema schema, Term term) {
+	private RelationalAlgebra parseOperation(Schema schema, Term term) throws Exception {
 		RelationalAlgebra ra = null;
 		RelationalAlgebra raSource = null;
 		BinaryOperation bo = null;
@@ -248,33 +248,34 @@ public class DatabaseImpl implements Database {
 			ra.setAttOrder(raSource.getAttOrder());
 			break;
 		default:
-			System.err.println("No implemented parser for " + type );
-			break;
+			throw new Exception("No implemented parser for SQLToAlgebra object " + type);
 		}
 		return ra;
 	}
 
-	private BinaryOperation binaryOperation(Schema schema, Term term) {
+	private BinaryOperation binaryOperation(Schema schema, Term term) throws Exception {
 		BinaryOperation bo = null;
 		// two sources, left and right
 		if (TwoArgTerm.class.isAssignableFrom(term.getClass())) {
 			TwoArgTerm twoTerms = (TwoArgTerm) term;
 			RelationalAlgebra leftSource = parseOperation(schema, twoTerms.getInputTerm1());
 			RelationalAlgebra rightSource = parseOperation(schema, twoTerms.getInputTerm2());
-			bo = new BinaryOperation(null, leftSource, rightSource) {
+			if (leftSource != null && rightSource != null) {
+				bo = new BinaryOperation(null, leftSource, rightSource) {
 
-				@Override
-				public String toString() {
-					return null;
-				}
+					@Override
+					public String toString() {
+						return null;
+					}
 
-				@Override
-				public String perform() {
-					return null;
-				}
-			};
-			// updating map of attributes order
-			updateAttsOrder(bo);
+					@Override
+					public String perform() {
+						return null;
+					}
+				};
+				// updating map of attributes order
+				updateAttsOrder(bo);
+			}
 		}
 		return bo;
 	}
