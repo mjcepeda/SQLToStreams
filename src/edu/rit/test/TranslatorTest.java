@@ -8,7 +8,7 @@ public class TranslatorTest {
 
 	@Test
 	public void test() {
-		Translator.translate("C:\\workspace\\Streams\\src\\edu\\rit\\test\\classDefinition.txt");
+		Translator.translate("C:\\workspace\\Streams\\src\\edu\\rit\\test\\performanceDMF.txt");
 	}
 
 }

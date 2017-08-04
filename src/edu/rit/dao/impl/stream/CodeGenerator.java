@@ -20,13 +20,23 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.WildcardTypeName;
 
 import edu.rit.dao.impl.store.access.UserDTO;
 
+/**
+ * The Class CodeGenerator.
+ */
 public class CodeGenerator {
-	// Libraries for generating java code: CodeModel, AST or JavaPoet
 
+	/**
+	 * Creates the method.
+	 *
+	 * @param name the name
+	 * @param stmts the stmts
+	 * @param params the params
+	 * @param returnParam the return param
+	 * @return the method spec
+	 */
 	public MethodSpec createMethod(String name, List<String> stmts, List<UserDTO> params, Object returnParam) {
 		// creating parameter List<Map<String,Object>
 		TypeName object = ClassName.get(Object.class);
@@ -49,15 +59,20 @@ public class CodeGenerator {
 					.build();
 			mb.addParameter(parameterSpec);
 		}
-
+		//inserting the stream operations into the method
 		for (String stmt : stmts) {
 			mb.addStatement(stmt);
 		}
-
 		MethodSpec m = mb.build();
 		return m;
 	}
 
+	/**
+	 * User DTO to map.
+	 *
+	 * @param dtoName the dto name
+	 * @return the method spec
+	 */
 	public MethodSpec userDTOtoMap(String dtoName) {
 		// extracting the package
 		int i = dtoName.lastIndexOf(".");
@@ -89,12 +104,17 @@ public class CodeGenerator {
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
-
 		// building the method
 		MethodSpec m = mb.build();
 		return m;
 	}
 
+	/**
+	 * Map to user DTO.
+	 *
+	 * @param dtoName the dto name
+	 * @return the method spec
+	 */
 	public MethodSpec mapToUserDTO(String dtoName) {
 		MethodSpec m = null;
 		// extracting the package
@@ -135,33 +155,18 @@ public class CodeGenerator {
 	}
 
 	/**
-	 * Object to maps. Transform user objects to Map<String, Object> String =
-	 * attribute name Object = attribute value
+	 * Creates the class.
 	 *
-	 * @param objs
-	 *            the objs
-	 * @return the list
+	 * @param packageName the package name
+	 * @param name the name
+	 * @param methods the methods
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	// public List<Map<String, Object>> objectToMaps(List<?> objs) {
-	// List<Map<String, Object>> schema = new ArrayList<>();
-	// for (Object bean : objs) {
-	// Map<String, Object> tmpTable = beanProperties(bean);
-	// if (tmpTable != null) {
-	// schema.add(tmpTable);
-	// }
-	// }
-	// return schema;
-	// }
-
 	public void createClass(String packageName, String name, List<MethodSpec> methods) throws IOException {
 		TypeSpec.Builder streamClass = TypeSpec.classBuilder(name).addModifiers(Modifier.PUBLIC);
 		for (MethodSpec m : methods) {
 			streamClass.addMethod(m);
 		}
-		// MethodSpec m = createMethodUserObjToMaps();
-		// streamClass.addMethod(m);
-		// MethodSpec methodBeanProperties = createMethodBeanProperties();
-		// streamClass.addMethod(methodBeanProperties);
 		JavaFile javaFile = JavaFile.builder(packageName, streamClass.build()).skipJavaLangImports(true).build();
 		javaFile.writeTo(new File("./src"));
 	}
@@ -171,8 +176,9 @@ public class CodeGenerator {
 	 * the bean and store them in a Map<String, Object> String = attribute name
 	 * Object = attribute value
 	 *
-	 * @param bean
-	 *            the bean
+	 * @param bean            the bean
+	 * @param mb the mb
+	 * @param name the name
 	 * @return the map
 	 */
 	private void beanProperties(Object bean, MethodSpec.Builder mb, String name) {
@@ -196,6 +202,12 @@ public class CodeGenerator {
 		}
 	}
 
+	/**
+	 * Map to DTO.
+	 *
+	 * @param bean the bean
+	 * @return the string
+	 */
 	private String mapToDTO(Object bean) {
 		StringBuilder sb = new StringBuilder();
 		try {
@@ -219,81 +231,4 @@ public class CodeGenerator {
 		}
 		return sb.toString();
 	}
-
-	// private void mapToDTOMethod(List<Map<String, Object>> listDTOs,
-	// MethodSpec.Builder mb) {
-	// try {
-	// Arrays.asList(Introspector.getBeanInfo(bean.getClass(),
-	// Object.class).getPropertyDescriptors()).stream()
-	// // filter out properties with setters only
-	// .filter(pd -> Objects.nonNull(pd.getReadMethod())).forEach(pd -> {
-	// try {
-	// Object value = pd.getReadMethod().invoke(bean);
-	// // if (value != null) {
-	// // map.put(pd.getName(), value);
-	// mb.addStatement(
-	// "m.put(\"" + pd.getName() + "\", bean." + pd.getReadMethod().getName() +
-	// "())");
-	// // }
-	// } catch (Exception e) {
-	// System.err.println(e.getMessage());
-	// }
-	// });
-	// } catch (IntrospectionException e) {
-	// System.err.println(e.getMessage());
-	// }
-	// }
-
-	private MethodSpec createMethodUserObjToMaps() {
-		// building return type List<Map<String,Object>>
-		TypeName object = ClassName.get(Object.class);
-		TypeName string = ClassName.get(String.class);
-		TypeName mapOfStringAndObject = ParameterizedTypeName.get(ClassName.get(Map.class), string, object);
-		ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(List.class),
-				mapOfStringAndObject);
-		// defining method signature
-		MethodSpec.Builder mb = MethodSpec.methodBuilder("userObjToMap").addModifiers(Modifier.PRIVATE)
-				.returns(parameterizedTypeName);
-		// input parameters type is Collection<UserDTO>
-		ParameterizedTypeName parameterizedList = ParameterizedTypeName.get(ClassName.get(Collection.class),
-				WildcardTypeName.subtypeOf(Object.class));
-		ParameterSpec parameterSpec = ParameterSpec.builder(parameterizedList, "table", Modifier.FINAL).build();
-		// adding the parameter
-		mb.addParameter(parameterSpec);
-		// adding the statements into the method
-		mb.addStatement("List<Map<String, Object>> tableData = new java.util.ArrayList<>()");
-		mb.addStatement(
-				"for (Object bean : table) { Map<String, Object> row = beanProperties(bean); if (row != null) { tableData.add(row); } } return tableData");
-		// building the method
-		MethodSpec m = mb.build();
-		return m;
-	}
-
-	private MethodSpec createMethodBeanProperties() {
-		// building return type List<Map<String,Object>>
-		TypeName object = ClassName.get(Object.class);
-		TypeName string = ClassName.get(String.class);
-		ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(ClassName.get(Map.class), string,
-				object);
-
-		// defining method signature
-		MethodSpec.Builder mb = MethodSpec.methodBuilder("beanProperties").addModifiers(Modifier.PRIVATE)
-				.returns(parameterizedTypeName);
-		// creating input parameter Object
-		// ParameterizedTypeName parameterizedObject =
-		// ParameterizedTypeName.OBJECT;
-		ParameterSpec parameterSpec = ParameterSpec.builder(object, "bean", Modifier.FINAL).build();
-		// adding the parameter
-		mb.addParameter(parameterSpec);
-		mb.addStatement("Map<String, Object> map = new java.util.HashMap<>(); "
-				+ "try { java.util.Arrays.asList(java.beans.Introspector.getBeanInfo(bean.getClass(), Object.class).getPropertyDescriptors()).stream()"
-				+ ".filter(pd -> java.util.Objects.nonNull(pd.getReadMethod())).forEach(pd -> {"
-				+ "try { Object value = pd.getReadMethod().invoke(bean); map.put(pd.getName(), value); } catch (Exception e) { System.err.println(e.getMessage()); }})");
-		mb.addStatement(
-				"} catch (java.beans.IntrospectionException e) { System.err.println(e.getMessage()); return java.util.Collections.emptyMap(); } return map");
-		// building the method
-		MethodSpec m = mb.build();
-		return m;
-	}
-
 }

@@ -26,20 +26,44 @@ import edu.rit.dao.impl.store.access.MethodDescriptor;
 import edu.rit.dao.impl.store.access.UserDTO;
 import edu.rit.utils.Utils;
 
+/**
+ * The Class Translator.
+ */
 public class Translator {
 
+	/** The db. */
 	private static Database db = new DatabaseImpl();
+	
+	/** The parser. */
 	private static ExecutionPlanParser parser = new ExecutionPlanParser();
+	
+	/** The generator. */
 	private static CodeGenerator generator = new CodeGenerator();
 
+	/** The Constant CLASSNAME. */
 	private static final String CLASSNAME = "class";
+	
+	/** The Constant METHOD. */
 	private static final String METHOD = "method";
+	
+	/** The Constant PARAMS. */
 	private static final String PARAMS = "params";
+	
+	/** The Constant RETURN. */
 	private static final String RETURN = "returnType";
+	
+	/** The Constant VOID_TYPE. */
 	private static final String VOID_TYPE = "void";
+	
+	/** The Constant QUERY. */
 	private static final String QUERY = "query";
 
-	// TODO MJCG Test queries with null and not null
+	/**
+	 * Read file.
+	 *
+	 * @param fileName the file name
+	 * @return the class descriptor
+	 */
 	public static ClassDescriptor readFile(String fileName) {
 		ClassDescriptor classDescriptor = null;
 		Configuration config = null;
@@ -94,7 +118,11 @@ public class Translator {
 		return classDescriptor;
 	}
 
-	// TODO MJCG Test negation
+	/**
+	 * Translate.
+	 *
+	 * @param fileName the file name
+	 */
 	public static void translate(String fileName) {
 		List<MethodSpec> methodsSpec = new ArrayList<>();
 		// reading the user file
@@ -173,19 +201,24 @@ public class Translator {
 		}
 	}
 
+	/**
+	 * Gets the input parameters.
+	 *
+	 * @param methodDescriptor the method descriptor
+	 * @return the input parameters
+	 */
 	public static List<UserDTO> getInputParameters(MethodDescriptor methodDescriptor) {
 		return methodDescriptor.getInputParams().stream().map(m -> {
 			String inputName = m.substring(m.lastIndexOf(".") + 1).toLowerCase();
 			Class c;
 			UserDTO udto = null;
 			try {
-				// TODO MJCG DTOs must have default constructor
+				//DTOs must have default constructor
 				c = Class.forName(m.trim());
 				Object obj = c.newInstance();
 				udto = new UserDTO(inputName, obj);
 			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-					| IllegalArgumentException e
-			/* | InvocationTargetException e */) {
+					| IllegalArgumentException e) {
 				System.err.println("Perhaps the default constructor is missing");
 				e.printStackTrace();
 			}
@@ -193,6 +226,12 @@ public class Translator {
 		}).collect(Collectors.toList());
 	}
 
+	/**
+	 * Checking for errors.
+	 *
+	 * @param config the config
+	 * @return the string
+	 */
 	private static String checkingForErrors(Configuration config) {
 		String error = null;
 		List<Object> classList = config.getList(CLASSNAME);
@@ -232,10 +271,11 @@ public class Translator {
 	}
 
 	/**
-	 * Translate the query execution plan into Stream Java code
-	 * 
-	 * @param plan
-	 * @return
+	 * Translate the query execution plan into Stream Java code.
+	 *
+	 * @param plan the plan
+	 * @param returnType the return type
+	 * @return the code
 	 */
 	private static List<String> getCode(RelationalAlgebra plan, String returnType) {
 		List<String> stmts = new ArrayList<>();
