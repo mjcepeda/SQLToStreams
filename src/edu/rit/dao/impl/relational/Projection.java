@@ -38,14 +38,14 @@ public class Projection extends UnaryOperation {
 		streamCode.append(getSource().getReturnVar());
 		streamCode.append(".get().map(bean -> {");
 		streamCode.append("Map<String, Object> tmp = new java.util.HashMap<>();");
-		streamCode.append("try {");
+		//streamCode.append("try {");
 		for (String columnName : attNames) {
-			streamCode.append("tmp.put(\"").append(columnName).append("\", org.apache.commons.beanutils.BeanUtils.getProperty(bean, \"")
+			streamCode.append("tmp.put(\"").append(columnName).append("\", bean.get(\"")
 					.append(columnName).append("\"));");
 		}
-		streamCode.append("} catch (IllegalAccessException | java.lang.reflect.InvocationTargetException | NoSuchMethodException e) {");
-		streamCode.append("System.err.println(e.getMessage());");
-		streamCode.append("return null; }");
+		//streamCode.append("} catch (IllegalAccessException | java.lang.reflect.InvocationTargetException | NoSuchMethodException e) {");
+		//streamCode.append("System.err.println(e.getMessage());");
+		//streamCode.append("return null; }");
 		// if we do not return the next map, it gives us an error
 		streamCode.append("return tmp; })");
 		return streamCode.toString();
