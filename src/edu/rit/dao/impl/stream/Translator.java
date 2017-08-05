@@ -17,6 +17,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import com.squareup.javapoet.MethodSpec;
 
+import adipe.translate.TranslationException;
 import adipe.translate.ra.Schema;
 import edu.rit.dao.iapi.Database;
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
@@ -156,7 +157,7 @@ public class Translator {
 				} else {
 					System.err.println("Error translating query :" + method.getQuery());
 				}
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | TranslationException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -264,7 +265,7 @@ public class Translator {
 		}
 		if (!(methodList.size() == paramList.size() && paramList.size() == returnList.size()
 				&& returnList.size() == queryList.size())) {
-			error = "The number of method, params, return and query keys do not match";
+			error = "The number of method, params, returnType and query keys do not match";
 		}
 
 		return error;

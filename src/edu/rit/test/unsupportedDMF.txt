@@ -1,0 +1,46 @@
+class=edu.rit.test.result.UnsupportedStream
+
+method=sorting
+params=edu.rit.test.data.Professor
+returnType=edu.rit.test.data.Professor
+query=select * from professor order by lastName
+
+method=aggregateOp
+params=edu.rit.test.data.Professor
+returnType=edu.rit.test.data.Professor
+query=select max(salary) from professor
+
+method=intersect
+params=edu.rit.test.data.Section
+returnType=edu.rit.test.data.Section
+query=select * from section where semester='Fall' and year=2009 intersect select * from section where semester='Spring' and year = 2010
+
+method=naturalJoin
+params=edu.rit.test.data.Professor, edu.rit.test.data.Department
+returnType=edu.rit.test.data.Professor
+query=select * from professor p natural join department
+
+method=leftOuter
+params=edu.rit.test.data.Professor, edu.rit.test.data.Department 
+returnType=edu.rit.test.data.Professor
+query=select * from professor p left outer join department d on p.dept = d.id 
+
+method=rightOuter
+params=edu.rit.test.data.Professor, edu.rit.test.data.Department 
+returnType=edu.rit.test.data.Professor
+query=select * from professor p right outer join department d on p.dept = d.id 
+
+method=fullOuter
+params=edu.rit.test.data.Professor, edu.rit.test.data.Department 
+returnType=edu.rit.test.data.Professor
+query=select * from professor p full outer join department d on p.dept = d.id 
+
+method=concat
+params=edu.rit.test.data.Professor
+returnType=edu.rit.test.data.Professor
+query=select name || ' ' || lastName from professor
+
+method=subquerySelect
+params=edu.rit.test.data.Professor, edu.rit.test.data.Department
+returnType=edu.rit.test.data.Professor
+query=select p.name, p.lastName, (select code from department d where d.id=p.dept) from professor p

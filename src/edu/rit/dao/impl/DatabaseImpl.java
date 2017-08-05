@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -19,7 +20,6 @@ import adipe.translate.Queries;
 import adipe.translate.Schemas;
 import adipe.translate.TranslationException;
 import adipe.translate.ra.Schema;
-import adipe.translate.ra.Terms;
 import edu.rit.dao.iapi.Database;
 import edu.rit.dao.iapi.relational.BinaryOperation;
 import edu.rit.dao.iapi.relational.RelationalAlgebra;
@@ -37,33 +37,65 @@ import edu.rit.dao.impl.store.access.Operator;
 import edu.rit.dao.impl.store.access.Qualifier;
 import edu.rit.utils.Utils;
 import ra.OneArgTerm;
-import ra.Result;
 import ra.Term;
 import ra.TwoArgTerm;
-import ra.operators.ReferenceT;
-import ra.operators.RelationT;
 
+/**
+ * The Class DatabaseImpl.
+ */
 public class DatabaseImpl implements Database {
 
+	// TODO Implement selectT operation
+
+	/** The Constant RELATION. */
 	public static final String RELATION = "relation";
+
+	/** The Constant GENJOIN. */
 	public static final String GENJOIN = "genjoin";
+
+	/** The Constant EQJOIN. */
 	public static final String EQJOIN = "eqjoin";
+
+	/** The Constant FILTER. */
 	public static final String FILTER = "filter";
+
+	/** The Constant PROJECTION. */
 	public static final String PROJECTION = "project";
-	// TODO MJCG Implement selectT operation
+
+	/** The Constant SELECT. */
 	public static final String SELECT = "select";
+
+	/** The Constant DUPREM. */
 	public static final String DUPREM = "duprem";
+
+	/** The Constant UNION. */
 	public static final String UNION = "union";
+
+	/** The Constant DIFF. */
 	public static final String DIFF = "diffset";
+
+	/** The Constant CARTPROD. */
 	public static final String CARTPROD = "cartprod";
+
+	/** The Constant REFERENCE. */
 	public static final String REFERENCE = "reference";
 
+	/** The attributes order. */
 	// index for every column
 	private Map<Integer, String> attributesOrder;
+
+	/** The schema column names. */
 	// contains the information about tables and column names
 	private TreeMap schemaColumnNames;
+
+	/** The counter. */
 	private int counter = 1;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.rit.dao.iapi.Database#createSchema(java.util.Map)
+	 */
 	public Schema createSchema(Map<String, Map<String, String>> schemaDescriptor) {
 		attributesOrder = new HashMap<>();
 		counter = 1;
@@ -72,29 +104,53 @@ public class DatabaseImpl implements Database {
 		return Schemas.fromDDL(sb.toString());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see edu.rit.dao.iapi.Database#getExecutionPlan(java.lang.String,
+	 * adipe.translate.ra.Schema)
+	 */
 	public RelationalAlgebra getExecutionPlan(String query, Schema schema) throws Exception {
 		RelationalAlgebra root = null;
-		try {
-			Term t = Queries.getRaOf(schema, query);
-			System.out.println(Terms.indent(t));
-
-			if (t != null) {
-				// getting the map with the information about columns name from
-				// the schema
-				Field fieldColumns = Utils.getField(schema.getClass(), "columnNames");
-				schemaColumnNames = (TreeMap) fieldColumns.get(schema);
-				root = parse(schema, t);
-			}
-		} catch (RuntimeException | TranslationException | IllegalAccessException e) {
-			throw new Exception(e.getMessage());
+		Term t = Queries.getRaOf(schema, query);
+		// System.out.println(Terms.indent(t));
+		if (t != null) {
+			// getting the map with the information about columns name from
+			// the schema
+			Field fieldColumns = Utils.getField(schema.getClass(), "columnNames");
+			schemaColumnNames = (TreeMap) fieldColumns.get(schema);
+			// parsing the query
+			root = parse(schema, t);
 		}
 		return root;
 	}
 
+	/**
+	 * Parses the.
+	 *
+	 * @param schema
+	 *            the schema
+	 * @param term
+	 *            the term
+	 * @return the relational algebra
+	 * @throws Exception
+	 *             the exception
+	 */
 	private RelationalAlgebra parse(Schema schema, Term term) throws Exception {
 		return parseOperation(schema, term);
 	}
 
+	/**
+	 * Parses the operation.
+	 *
+	 * @param schema
+	 *            the schema
+	 * @param term
+	 *            the term
+	 * @return the relational algebra
+	 * @throws Exception
+	 *             the exception
+	 */
 	private RelationalAlgebra parseOperation(Schema schema, Term term) throws Exception {
 		RelationalAlgebra ra = null;
 		RelationalAlgebra raSource = null;
@@ -212,9 +268,6 @@ public class DatabaseImpl implements Database {
 					attsOrder.put(order, s);
 					order++;
 				}
-				// ra = new Join(Utils.randomIdentifier(EQJOIN),
-				// bo.getLeftSource(), bo.getRightSource(), qualifiers);
-				// ra.setAttOrder(attsOrder);
 				// join operation is a cartesian product and a select
 				raSource = new CartesianProduct(Utils.randomIdentifier(CARTPROD), bo.getLeftSource(),
 						bo.getRightSource());
@@ -230,7 +283,7 @@ public class DatabaseImpl implements Database {
 
 			break;
 		case GENJOIN:
-			// Implement it like a cartesian product with a select
+			// Implement it as a cartesian product with a select
 			bo = binaryOperation(schema, term);
 			checkingDuplicateAttNames(bo);
 			raSource = new CartesianProduct(Utils.randomIdentifier(CARTPROD), bo.getLeftSource(), bo.getRightSource());
@@ -253,6 +306,17 @@ public class DatabaseImpl implements Database {
 		return ra;
 	}
 
+	/**
+	 * Binary operation.
+	 *
+	 * @param schema
+	 *            the schema
+	 * @param term
+	 *            the term
+	 * @return the binary operation
+	 * @throws Exception
+	 *             the exception
+	 */
 	private BinaryOperation binaryOperation(Schema schema, Term term) throws Exception {
 		BinaryOperation bo = null;
 		// two sources, left and right
@@ -280,6 +344,13 @@ public class DatabaseImpl implements Database {
 		return bo;
 	}
 
+	/**
+	 * Gets the source.
+	 *
+	 * @param term
+	 *            the term
+	 * @return the source
+	 */
 	private Term getSource(Term term) {
 		Term t = null;
 		// Check whether superClass is OneArgTerm
@@ -290,6 +361,15 @@ public class DatabaseImpl implements Database {
 		return t;
 	}
 
+	/**
+	 * Creates the table statement.
+	 *
+	 * @param tableName
+	 *            the table name
+	 * @param columnsDescMap
+	 *            the columns desc map
+	 * @return the string
+	 */
 	private String createTableStatement(String tableName, Map<String, String> columnsDescMap) {
 		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(tableName).append(" (");
 		for (Iterator<String> iter = columnsDescMap.keySet().iterator(); iter.hasNext();) {
@@ -304,6 +384,15 @@ public class DatabaseImpl implements Database {
 		return sql.toString();
 	}
 
+	/**
+	 * Parses the predicate.
+	 *
+	 * @param term
+	 *            the term
+	 * @param attsOrder
+	 *            the atts order
+	 * @return the predicate listener
+	 */
 	private PredicateListener parsePredicate(Term term, Map<Integer, ColumnDescriptor> attsOrder) {
 		// creating the listener
 		PredicateListener listener = new PredicateListener(attsOrder);
@@ -328,6 +417,12 @@ public class DatabaseImpl implements Database {
 		return listener;
 	}
 
+	/**
+	 * Checking duplicate att names.
+	 *
+	 * @param bo
+	 *            the bo
+	 */
 	private void checkingDuplicateAttNames(BinaryOperation bo) {
 		// checking whether there are duplicates attributes name
 		Map<String, Integer> mapLeftSource = new HashMap<>();
@@ -340,9 +435,18 @@ public class DatabaseImpl implements Database {
 			renamingAttribute(attName, mapLeftSource, bo.getLeftSource().getAttOrder());
 			renamingAttribute(attName, mapRightSource, bo.getRightSource().getAttOrder());
 		}
-		// updateAttsOrder(bo);
 	}
 
+	/**
+	 * Renaming attribute.
+	 *
+	 * @param attName
+	 *            the att name
+	 * @param tmpMap
+	 *            the tmp map
+	 * @param attsMap
+	 *            the atts map
+	 */
 	private void renamingAttribute(String attName, Map<String, Integer> tmpMap,
 			Map<Integer, ColumnDescriptor> attsMap) {
 		Integer id = tmpMap.get(attName);
@@ -350,6 +454,12 @@ public class DatabaseImpl implements Database {
 		c.setAlias(c.getTableName() + "_" + c.getName());
 	}
 
+	/**
+	 * Update atts order.
+	 *
+	 * @param bo
+	 *            the bo
+	 */
 	private void updateAttsOrder(BinaryOperation bo) {
 		// updating attributes order of both sources
 		int index = 1;

@@ -1,9 +1,9 @@
-class=edu.rit.test.UniversityStreams
+class=edu.rit.test.result.UniversityStreams
 
 method=testJoin
 params=edu.rit.test.data.Professor, edu.rit.test.data.Department
 returnType=edu.rit.test.data.Professor
-query=select p.name, p.lastName from professor p inner join department d on d.id = p.dept and deptName='Computer Science'
+query=select p.name, p.lastName, p.dept from professor p inner join department d on d.id = p.dept and deptName='Computer Science'
 
 method=testSelect
 params=edu.rit.test.data.Professor
@@ -19,4 +19,3 @@ method=testDifference
 params=edu.rit.test.data.Section
 returnType=edu.rit.test.data.Section
 query=select courseId from section where semester='Fall' and year=2009 except select courseId from section where semester='Spring' and year = 2010
-

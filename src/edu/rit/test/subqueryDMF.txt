@@ -1,0 +1,6 @@
+class=edu.rit.test.result.SubqueryStream
+
+method=subqueryFrom
+params=edu.rit.test.data.Professor, edu.rit.test.data.Department
+returnType=edu.rit.test.data.Professor
+query=select * from professor p, (select id from department where code='CSCI') d where d.id= p.dept

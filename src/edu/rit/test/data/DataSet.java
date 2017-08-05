@@ -41,7 +41,7 @@ public class DataSet {
 		professors.add(new Professor("Charles", "Dawson", 34, "M", 1,1, 45000));
 		professors.add(new Professor("Robert", "Alton", 44, "M", 1,2, 50000));
 		professors.add(new Professor("Elizabeth", "Smith", 38, "F", 1,3, 45000));
-		professors.add(new Professor("Jane", "Doe", 48, "F", 2,4, 55000));
+		professors.add(new Professor("Jane", "Doe", 48, "F", 2,4, null));
 		professors.add(new Professor("Luca", "Rossina", 55, "M", 2,5, 0));
 		professors.add(new Professor("Ashwin", "Ranesh", 48, "M", 2,6, 68000));
 		professors.add(new Professor("Andrea", "Mangerini", 60, "F", 1,7, 89000));

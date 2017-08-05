@@ -1,6 +1,6 @@
 package edu.rit.test;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,18 +10,27 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import edu.rit.test.data.DataSet;
 import edu.rit.test.data.Department;
 import edu.rit.test.data.Professor;
 import edu.rit.test.data.Section;
+import edu.rit.test.result.UniversityStreams;
 
+/**
+ * The Class PerformanceTest.
+ */
 public class PerformanceTest {
 
+	/** The professors. */
 	private List<Professor> professors;
+	
+	/** The sections. */
 	private List<Section> sections;
 
+	/**
+	 * Test.
+	 */
 	@Test
 	public void test() {
 		generateProfessors(100000);
@@ -32,13 +41,24 @@ public class PerformanceTest {
 		for (int limit : limits) {
 			List<Professor> l = professors.stream().limit(limit).collect(Collectors.toList());
 			List<Section> s = sections.stream().limit(limit).collect(Collectors.toList());
-			// testJoin(u, l, data.getDepartments(), limit);
-			// testSelect(u, l, limit);
-			// testUnion(u, l, data.getDepartments(), limit);
-			testDifference(u, s, limit);
+			////////////////////////////////////////////
+			//uncomment the method that you want to test
+			///////////////////////////////////////////
+			testJoin(u, l, data.getDepartments(), limit);
+			//testSelect(u, l, limit);
+			//testUnion(u, l, data.getDepartments(), limit);
+			//testDifference(u, s, limit);
 		}
 	}
 
+	/**
+	 * Test join.
+	 *
+	 * @param u the u
+	 * @param p the p
+	 * @param d the d
+	 * @param limit the limit
+	 */
 	public void testJoin(UniversityStreams u, List<Professor> p, List<Department> d, int limit) {
 		for (int i = 0; i <= 25; i++) {
 			// executing code generated for my solution
@@ -56,10 +76,19 @@ public class PerformanceTest {
 					+ uresult.size());
 			assertTrue(result.size() > 0);
 			assertTrue(result.size() == uresult.size());
+			//Computer Science department is id 1
+			result.forEach(prof -> assertTrue(prof.getDept()==1));
 			// assertSame(result, uresult);
 		}
 	}
 
+	/**
+	 * Test select.
+	 *
+	 * @param u the u
+	 * @param p the p
+	 * @param limit the limit
+	 */
 	public void testSelect(UniversityStreams u, List<Professor> p, int limit) {
 		for (int i = 0; i <= 25; i++) {
 			// executing code generated for my solution
@@ -77,10 +106,19 @@ public class PerformanceTest {
 					+ uresult.size());
 			assertTrue(result.size() > 0);
 			assertTrue(result.size() == uresult.size());
+			result.forEach(prof -> assertTrue(prof.getSalary()>95000));
 			// assertSame(result, uresult);
 		}
 	}
 
+	/**
+	 * Test union.
+	 *
+	 * @param u the u
+	 * @param p the p
+	 * @param d the d
+	 * @param limit the limit
+	 */
 	public void testUnion(UniversityStreams u, List<Professor> p, List<Department> d, int limit) {
 		for (int i = 0; i <= 25; i++) {
 			// executing time of equivalent code
@@ -98,10 +136,19 @@ public class PerformanceTest {
 					+ uresult.size());
 			assertTrue(result.size() > 0);
 			assertTrue(result.size() == uresult.size());
+			//departments 1 CSCI or 2 CPET
+			result.forEach(prof -> assertTrue(prof.getDept()==1 || prof.getDept()==2));
 			// assertSame(result, uresult);
 		}
 	}
 
+	/**
+	 * Test difference.
+	 *
+	 * @param u the u
+	 * @param s the s
+	 * @param limit the limit
+	 */
 	public void testDifference(UniversityStreams u, List<Section> s, int limit) {
 		for (int i = 0; i <= 25; i++) {
 			// executing code generated for my solution
@@ -125,6 +172,13 @@ public class PerformanceTest {
 		// uresult.forEach(System.out::println);
 	}
 
+	/**
+	 * User join.
+	 *
+	 * @param professor the professor
+	 * @param department the department
+	 * @return the list
+	 */
 	public List<String> userJoin(final Collection<Professor> professor, final Collection<Department> department) {
 		return professor.stream()
 				.flatMap(p -> department.stream()
@@ -132,6 +186,12 @@ public class PerformanceTest {
 				.map(p -> p.getName() + ", " + p.getLastName()).collect(Collectors.toList());
 	}
 
+	/**
+	 * User select.
+	 *
+	 * @param professor the professor
+	 * @return the list
+	 */
 	public List<Professor> userSelect(final Collection<Professor> professor) {
 		return professor.stream().filter(p -> p.getSalary() > 95000 && p.getAge() <= 45).map(p -> {
 			Professor p2 = new Professor();
@@ -140,6 +200,13 @@ public class PerformanceTest {
 		}).collect(Collectors.toList());
 	}
 
+	/**
+	 * User union.
+	 *
+	 * @param professor the professor
+	 * @param department the department
+	 * @return the list
+	 */
 	public List<String> userUnion(final Collection<Professor> professor, final Collection<Department> department) {
 		return Stream.concat(
 				professor.stream().filter(p -> p.getDept() == 2).map(s -> s.getName()),
@@ -147,6 +214,12 @@ public class PerformanceTest {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * User difference.
+	 *
+	 * @param section the section
+	 * @return the list
+	 */
 	public List<String> userDifference(final Collection<Section> section) {
 		List<String> fall = section.stream().filter(s -> s.getYear() == 2009 && s.getSemester() == "Fall")
 				.map(s -> s.getCourseId()).collect(Collectors.toList());
@@ -155,6 +228,11 @@ public class PerformanceTest {
 		return fall.stream().filter(s -> !spring.contains(s)).collect(Collectors.toList());
 	}
 
+	/**
+	 * Generate professors.
+	 *
+	 * @param limit the limit
+	 */
 	private void generateProfessors(int limit) {
 		professors = new ArrayList<>();
 		// int third = limit / 2;
@@ -172,6 +250,11 @@ public class PerformanceTest {
 		}
 	}
 
+	/**
+	 * Generate sections.
+	 *
+	 * @param limit the limit
+	 */
 	private void generateSections(int limit) {
 		sections = new ArrayList<>();
 		// int third = limit / 2;
