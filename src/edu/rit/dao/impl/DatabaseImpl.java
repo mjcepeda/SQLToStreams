@@ -12,13 +12,11 @@ import java.util.TreeMap;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.collections.CollectionUtils;
 
 import adipe.translate.Queries;
 import adipe.translate.Schemas;
-import adipe.translate.TranslationException;
 import adipe.translate.ra.Schema;
 import edu.rit.dao.iapi.Database;
 import edu.rit.dao.iapi.relational.BinaryOperation;
