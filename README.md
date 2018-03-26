@@ -17,8 +17,8 @@ Then, invoke Translator.translate using the name of DMF as an input parameter.
 ```
 Translator.translate("\\DMF.txt");
 ```
-The result would be the generation of the java file UniversityStreams with the professorSalary method. 
-This method will contain the simulation of the query 'select * from professor where salary > 95000' using stream operations.
+The result would be the generation of the java file UniversityStreams with a professorSalary method. 
+This method will simulate the query 'select * from professor where salary > 95000' using stream operations.
 ```
 public List<Professor> professorSalary(final Collection<Professor> professor) {
     Supplier<Stream<Map<String, Object>>> professorIWJ5LB6 = () -> professorToMap(professor).stream();
