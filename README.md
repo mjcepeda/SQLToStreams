@@ -1,7 +1,5 @@
 # SQLToStreams
-The aim of this project is to translate SQL query into a sequence of relational algebra operations
-and, then, apply transformations to generate code using streams that have the same behavior as the SQL query.
-
+The aim of this project is to evaluate Java 8 Streams API versatility to simulate different SQL queries. Given a SQL query, this tool translates such query into a pipeline of relational algebra operations and generate Java code using Streams API that simulate the same behavior of the input query.
 Currently, our system implements all the fundamental relational algebra operations except **rename**. These operations perform table **join**,
 **union**, **difference**, **projection**, and **selection**.
 
