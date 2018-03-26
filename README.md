@@ -34,7 +34,7 @@ public List<Professor> professorSalary(final Collection<Professor> professor) {
 }
 ```
 # Limitations
-The list of operations to be implemented is as follows:
+The list of operations not supported:
 * Rename
 * Natural join
 * Left outer join
